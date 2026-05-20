@@ -1,0 +1,30 @@
+#ifndef COLOR_H
+#define COLOR_H
+
+#include "utilities.h"
+
+struct Color {
+  double r, g, b;
+
+  Color(double r, double g, double b) : r(r), g(g), b(b) {}
+
+  bool operator==(const Color &other) const {
+    return equal(r, other.r) && equal(g, other.g) && equal(b, other.b);
+  }
+
+  Color operator+(Color &other) const {
+    return Color(r + other.r, g + other.g, b + other.b);
+  }
+  Color operator-(Color &other) const {
+    return Color(r - other.r, g - other.g, b - other.b);
+  }
+  Color operator*(double scalar) const {
+    return Color(r * scalar, g * scalar, b * scalar);
+  }
+
+  Color operator*(Color &other) const {
+    return Color(r * other.r, g * other.g, b * other.b);
+  }
+};
+
+#endif

@@ -24,7 +24,7 @@ public:
   double magnitude() const;
   RayTuple normalize() const;
 
-  double dot(RayTuple &other) const;
+  double dot(const RayTuple &other) const;
 };
 
 class RayPoint : public RayTuple {
@@ -37,7 +37,7 @@ class RayVector : public RayTuple {
 public:
   RayVector(double x, double y, double z);
   RayVector(const RayTuple &t);
-  RayVector cross(RayVector &other) const;
+  RayVector cross(const RayVector &other) const;
 };
 
 #endif

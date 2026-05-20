@@ -14,4 +14,14 @@ void run_tests() {
   test_normalize_vector();
   test_dot_product_vector();
   test_cross_product_vector();
+
+  test_color_implementation();
+  test_color_addition();
+  test_color_subtraction();
+  test_color_multiplication_by_scalar();
+  test_color_multiply_by_color();
+
+  test_create_canvas();
+  test_writing_canvas();
+  test_canvas_to_ppm_header();
 }

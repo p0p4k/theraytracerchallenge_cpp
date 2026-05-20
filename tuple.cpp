@@ -43,10 +43,12 @@ RayPoint::RayPoint(const RayTuple &t) : RayTuple(t.x, t.y, t.z, t.w) {}
 RayVector::RayVector(double x, double y, double z) : RayTuple(x, y, z, 0.0) {}
 RayVector::RayVector(const RayTuple &t) : RayTuple(t.x, t.y, t.z, t.w) {}
 
-RayVector RayVector::cross(RayVector &other) const {
+RayVector RayVector::cross(const RayVector &other) const {
   return RayVector(y * other.z - z * other.y, z * other.x - x * other.z,
                    x * other.y - y * other.x);
 }
+
+// color
 
 // utilities
 double RayTuple::magnitude() const { return std::sqrt(x * x + y * y + z * z); }
@@ -56,6 +58,6 @@ RayTuple RayTuple::normalize() const {
   return RayTuple(x / mv, y / mv, z / mv, w / mv);
 }
 
-double RayTuple::dot(RayTuple &other) const {
+double RayTuple::dot(const RayTuple &other) const {
   return x * other.x + y * other.y + z * other.z + w * other.w;
 }
