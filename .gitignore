@@ -1,0 +1,6 @@
+raytracer
+bin/
+
+*.o
+*.obj
+
