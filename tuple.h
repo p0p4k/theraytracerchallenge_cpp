@@ -12,9 +12,11 @@ public:
   double z;
   double w;
 
-  void iswhat();
+  void iswhat() const;
+  void print_tuple() const;
 
   bool operator==(const RayTuple &other) const;
+  bool operator!=(const RayTuple &other) const;
   RayTuple operator-(const RayTuple &other) const;
   RayTuple operator+(const RayTuple &other) const;
   RayTuple operator-() const;

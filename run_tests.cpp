@@ -24,4 +24,18 @@ void run_tests() {
   test_create_canvas();
   test_writing_canvas();
   test_canvas_to_ppm_header();
+
+  test_matrix_construction();
+  test_matrix_comparision_equal();
+  test_matrix_comparision_not_equal();
+  test_matrix_multiply();
+  test_matrix_tuple_multiply();
+  test_identity_matrix_multiplication();
+  test_matrix_transpose();
+  test_matrix_submatrix();
+  test_matrix_determinant_2x2();
+  test_matrix_minor_3x3();
+  test_matrix_cofactor();
+  test_matrix_determinant_large();
+  test_matrix_inversion();
 }

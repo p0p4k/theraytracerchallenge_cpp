@@ -5,16 +5,25 @@
 RayTuple::RayTuple(double x, double y, double z, double w)
     : x(x), y(y), z(z), w(w) {}
 
-void RayTuple::iswhat() {
+void RayTuple::iswhat() const {
   if (w == 1.0)
     std::cout << "is a point" << std::endl;
   if (w == 0.0)
     std::cout << "is a vector" << std::endl;
 }
 
+void RayTuple::print_tuple() const {
+  std::cout << "x: " << x << " y: " << y << " z: " << z << " w: " << w
+            << std::endl;
+}
+
 bool RayTuple::operator==(const RayTuple &other) const {
   return equal(x, other.x) && equal(y, other.y) && equal(z, other.z) &&
          equal(w, other.w);
+}
+
+bool RayTuple::operator!=(const RayTuple &other) const {
+  return !(*this == other);
 }
 
 RayTuple RayTuple::operator-(const RayTuple &other) const {
@@ -47,8 +56,6 @@ RayVector RayVector::cross(const RayVector &other) const {
   return RayVector(y * other.z - z * other.y, z * other.x - x * other.z,
                    x * other.y - y * other.x);
 }
-
-// color
 
 // utilities
 double RayTuple::magnitude() const { return std::sqrt(x * x + y * y + z * z); }

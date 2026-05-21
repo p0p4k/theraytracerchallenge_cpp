@@ -3,7 +3,9 @@
 
 #include "canvas.h"
 #include "color.h"
+#include "matrix.h"
 #include "tuple.h"
+
 #include <cassert>
 
 void test_tuple_to_point();
@@ -28,5 +30,19 @@ void test_color_multiply_by_color();
 void test_create_canvas();
 void test_writing_canvas();
 void test_canvas_to_ppm_header();
+
+void test_matrix_construction();
+void test_matrix_comparision_equal();
+void test_matrix_comparision_not_equal();
+void test_matrix_multiply();
+void test_matrix_tuple_multiply();
+void test_identity_matrix_multiplication();
+void test_matrix_transpose();
+void test_matrix_submatrix();
+void test_matrix_determinant_2x2();
+void test_matrix_minor_3x3();
+void test_matrix_cofactor();
+void test_matrix_determinant_large();
+void test_matrix_inversion();
 
 #endif
