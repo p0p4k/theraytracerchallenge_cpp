@@ -38,4 +38,13 @@ void run_tests() {
   test_matrix_cofactor();
   test_matrix_determinant_large();
   test_matrix_inversion();
+
+  test_matrix_translation();
+  test_matrix_scaling();
+  test_matrix_rotation_x();
+  test_matrix_rotation_y();
+  test_matrix_rotation_z();
+  test_matrix_rotation_x_inverse();
+  test_matrix_shearing();
+  test_individual_and_chained_transformations();
 }

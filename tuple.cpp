@@ -62,7 +62,7 @@ double RayTuple::magnitude() const { return std::sqrt(x * x + y * y + z * z); }
 
 RayTuple RayTuple::normalize() const {
   double mv = this->magnitude();
-  return RayTuple(x / mv, y / mv, z / mv, w / mv);
+  return RayTuple(x / mv, y / mv, z / mv, w);
 }
 
 double RayTuple::dot(const RayTuple &other) const {

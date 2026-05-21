@@ -29,6 +29,15 @@ public:
   Matrix inverse() const;
 
   static Matrix identity(unsigned int size);
+  static Matrix translation(double x, double y, double z);
+  static Matrix scaling(double x, double y, double z);
+  static Matrix rotation_x(double angle);
+  static Matrix rotation_y(double angle);
+  static Matrix rotation_z(double angle);
+  static Matrix shearing(double xy, double xz, double yx, double yz, double zx,
+                         double zy);
+  RayPoint transform_point(const RayPoint &p) const;
+  RayVector transform_vector(const RayVector &v) const;
 
   void print_matrix() const;
 };

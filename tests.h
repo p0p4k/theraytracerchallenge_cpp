@@ -5,6 +5,7 @@
 #include "color.h"
 #include "matrix.h"
 #include "tuple.h"
+#include "utilities.h"
 
 #include <cassert>
 
@@ -44,5 +45,14 @@ void test_matrix_minor_3x3();
 void test_matrix_cofactor();
 void test_matrix_determinant_large();
 void test_matrix_inversion();
+
+void test_matrix_translation();
+void test_matrix_scaling();
+void test_matrix_rotation_x();
+void test_matrix_rotation_y();
+void test_matrix_rotation_z();
+void test_matrix_rotation_x_inverse();
+void test_matrix_shearing();
+void test_individual_and_chained_transformations();
 
 #endif

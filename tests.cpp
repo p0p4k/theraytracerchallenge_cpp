@@ -1,4 +1,5 @@
 #include "tests.h"
+#include "tuple.h"
 #include <cmath>
 #include <iostream>
 #include <ostream>
@@ -734,4 +735,217 @@ void test_matrix_inversion() {
   Matrix Original_C = Product.matrix_multiply(D.inverse());
 
   assert(Original_C == C);
+}
+
+void test_matrix_translation() {
+  Matrix transform = Matrix::translation(5, -3, 2);
+  RayPoint p(-3, 4, 5);
+  RayPoint result = transform.transform_point(p);
+
+  assert(equal(result.x, 2.0));
+  assert(equal(result.y, 1.0));
+  assert(equal(result.z, 7.0));
+  assert(equal(result.w, 1.0));
+
+  Matrix inv = transform.inverse();
+  RayPoint back_result = inv.transform_point(p);
+  assert(equal(back_result.x, -8.0));
+  assert(equal(back_result.y, 7.0));
+  assert(equal(back_result.z, 3.0));
+  assert(equal(back_result.w, 1.0));
+
+  RayVector v(-3, 4, 5);
+  RayVector vec_result = transform.transform_vector(v);
+  assert(equal(vec_result.x, -3.0));
+  assert(equal(vec_result.y, 4.0));
+  assert(equal(vec_result.z, 5.0));
+  assert(equal(vec_result.w, 0.0));
+
+  std::cout << "[PASS 4.1] Matrix translation works." << std::endl;
+}
+
+void test_matrix_scaling() {
+  Matrix transform = Matrix::scaling(2, 3, 4);
+
+  RayPoint p(-4, 6, 8);
+  RayPoint point_result = transform.transform_point(p);
+  assert(equal(point_result.x, -8.0));
+  assert(equal(point_result.y, 18.0));
+  assert(equal(point_result.z, 32.0));
+  assert(equal(point_result.w, 1.0));
+
+  RayVector v(-4, 6, 8);
+  RayVector vec_result = transform.transform_vector(v);
+  assert(equal(vec_result.x, -8.0));
+  assert(equal(vec_result.y, 18.0));
+  assert(equal(vec_result.z, 32.0));
+  assert(equal(vec_result.w, 0.0));
+
+  Matrix inv = transform.inverse();
+  RayVector inv_result = inv.transform_vector(v);
+  assert(equal(inv_result.x, -2.0));
+  assert(equal(inv_result.y, 2.0));
+  assert(equal(inv_result.z, 2.0));
+  assert(equal(inv_result.w, 0.0));
+
+  Matrix reflect = Matrix::scaling(-1, 1, 1);
+  RayPoint p2(2, 3, 4);
+  RayPoint reflect_result = reflect.transform_point(p2);
+  assert(equal(reflect_result.x, -2.0));
+  assert(equal(reflect_result.y, 3.0));
+  assert(equal(reflect_result.z, 4.0));
+  assert(equal(reflect_result.w, 1.0));
+
+  std::cout << "[PASS 4.2] Matrix scaling and reflection works." << std::endl;
+}
+
+void test_matrix_rotation_x() {
+  Matrix half_quater = Matrix::rotation_x(PI / 4);
+  Matrix full_quarter = Matrix::rotation_x(PI / 2);
+  RayPoint p(0, 1, 0);
+  RayPoint point_result = half_quater.transform_point(p);
+  RayPoint point_result_2 = full_quarter.transform_point(p);
+
+  assert(equal(point_result.x, 0));
+  assert(equal(point_result.y, std::sqrt(2) / 2));
+  assert(equal(point_result.z, std::sqrt(2) / 2));
+
+  assert(equal(point_result_2.x, 0));
+  assert(equal(point_result_2.y, 0));
+  assert(equal(point_result_2.z, 1));
+
+  std::cout << "[PASS 4.3] Matrix rotation_x works." << std::endl;
+}
+
+void test_matrix_rotation_x_inverse() {
+  Matrix half_quarter = Matrix::rotation_x(PI / 4.0);
+  Matrix inv = half_quarter.inverse();
+  RayPoint p(0, 1, 0);
+
+  RayPoint point_result = inv.transform_point(p);
+
+  assert(equal(point_result.x, 0.0));
+  assert(equal(point_result.y, std::sqrt(2.0) / 2.0));
+  assert(equal(point_result.z, -std::sqrt(2.0) / 2.0));
+  assert(equal(point_result.w, 1.0));
+
+  std::cout << "[PASS 4.4] Matrix rotation_x inverse works." << std::endl;
+}
+
+void test_matrix_rotation_y() {
+  Matrix half_quarter = Matrix::rotation_y(PI / 4.0);
+  Matrix full_quarter = Matrix::rotation_y(PI / 2.0);
+  RayPoint p(0, 0, 1);
+
+  RayPoint point_result = half_quarter.transform_point(p);
+  RayPoint point_result_2 = full_quarter.transform_point(p);
+
+  assert(equal(point_result.x, std::sqrt(2.0) / 2.0));
+  assert(equal(point_result.y, 0.0));
+  assert(equal(point_result.z, std::sqrt(2.0) / 2.0));
+  assert(equal(point_result.w, 1.0));
+
+  assert(equal(point_result_2.x, 1.0));
+  assert(equal(point_result_2.y, 0.0));
+  assert(equal(point_result_2.z, 0.0));
+  assert(equal(point_result_2.w, 1.0));
+
+  std::cout << "[PASS 4.5] Matrix rotation_y works." << std::endl;
+}
+
+void test_matrix_rotation_z() {
+  Matrix half_quarter = Matrix::rotation_z(PI / 4.0);
+  Matrix full_quarter = Matrix::rotation_z(PI / 2.0);
+  RayPoint p(0, 1, 0);
+
+  RayPoint point_result = half_quarter.transform_point(p);
+  RayPoint point_result_2 = full_quarter.transform_point(p);
+
+  assert(equal(point_result.x, -std::sqrt(2.0) / 2.0));
+  assert(equal(point_result.y, std::sqrt(2.0) / 2.0));
+  assert(equal(point_result.z, 0.0));
+  assert(equal(point_result.w, 1.0));
+
+  assert(equal(point_result_2.x, -1.0));
+  assert(equal(point_result_2.y, 0.0));
+  assert(equal(point_result_2.z, 0.0));
+  assert(equal(point_result_2.w, 1.0));
+
+  std::cout << "[PASS 4.6] Matrix rotation_z works." << std::endl;
+}
+
+void test_matrix_shearing() {
+  RayPoint p(2, 3, 4);
+
+  Matrix s_xy = Matrix::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+  RayPoint r_xy = s_xy.transform_point(p);
+  assert(equal(r_xy.x, 5.0));
+  assert(equal(r_xy.y, 3.0));
+  assert(equal(r_xy.z, 4.0));
+
+  Matrix s_xz = Matrix::shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  RayPoint r_xz = s_xz.transform_point(p);
+  assert(equal(r_xz.x, 6.0));
+  assert(equal(r_xz.y, 3.0));
+  assert(equal(r_xz.z, 4.0));
+
+  Matrix s_yx = Matrix::shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+  RayPoint r_yx = s_yx.transform_point(p);
+  assert(equal(r_yx.x, 2.0));
+  assert(equal(r_yx.y, 5.0));
+  assert(equal(r_yx.z, 4.0));
+
+  Matrix s_yz = Matrix::shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+  RayPoint r_yz = s_yz.transform_point(p);
+  assert(equal(r_yz.x, 2.0));
+  assert(equal(r_yz.y, 7.0));
+  assert(equal(r_yz.z, 4.0));
+
+  Matrix s_zx = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  RayPoint r_zx = s_zx.transform_point(p);
+  assert(equal(r_zx.x, 2.0));
+  assert(equal(r_zx.y, 3.0));
+  assert(equal(r_zx.z, 6.0));
+
+  Matrix s_zy = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+  RayPoint r_zy = s_zy.transform_point(p);
+  assert(equal(r_zy.x, 2.0));
+  assert(equal(r_zy.y, 3.0));
+  assert(equal(r_zy.z, 7.0));
+
+  std::cout << "[PASS 4.7] Matrix shearing transformations works." << std::endl;
+}
+
+void test_individual_and_chained_transformations() {
+  RayPoint p(1.0, 0.0, 1.0);
+
+  Matrix A = Matrix::rotation_x(PI / 2.0);
+  Matrix B = Matrix::scaling(5.0, 5.0, 5.0);
+  Matrix C = Matrix::translation(10.0, 5.0, 7.0);
+
+  RayPoint p2 = A.transform_point(p);
+  assert(equal(p2.x, 1.0));
+  assert(equal(p2.y, -1.0));
+  assert(equal(p2.z, 0.0));
+
+  RayPoint p3 = B.transform_point(p2);
+  assert(equal(p3.x, 5.0));
+  assert(equal(p3.y, -5.0));
+  assert(equal(p3.z, 0.0));
+
+  RayPoint p4 = C.transform_point(p3);
+  assert(equal(p4.x, 15.0));
+  assert(equal(p4.y, 0.0));
+  assert(equal(p4.z, 7.0));
+
+  Matrix T = C.matrix_multiply(B.matrix_multiply(A));
+
+  RayPoint chained_result = T.transform_point(p);
+  assert(equal(chained_result.x, 15.0));
+  assert(equal(chained_result.y, 0.0));
+  assert(equal(chained_result.z, 7.0));
+  assert(equal(chained_result.w, 1.0));
+
+  std::cout << "[PASS 4.8] Individual and chained transformations works."
+            << std::endl;
 }
