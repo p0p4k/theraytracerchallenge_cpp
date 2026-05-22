@@ -4,9 +4,11 @@
 #include "canvas.h"
 #include "color.h"
 #include "intersection.h"
+#include "light_source.h"
 #include "matrix.h"
 #include "ray.h"
 #include "sphere.h"
+#include "test_helpers.h"
 #include "tuple.h"
 #include "utilities.h"
 #include <cmath>
@@ -78,5 +80,24 @@ void test_sphere_default_transformation();
 void test_sphere_transformation();
 void test_intersect_scaled_sphere_with_ray();
 void test_intersect_translated_sphere_with_ray();
+
+void test_normal_on_sphere_at_point_on_x_axis();
+void test_normal_on_sphere_at_point_on_y_axis();
+void test_normal_on_sphere_at_point_on_z_axis();
+void test_normal_on_sphere_at_non_axial_point();
+void test_normal_is_a_normalized_vector();
+void test_computing_normal_on_translated_sphere();
+void test_computing_normal_on_transformed_sphere();
+void test_reflecting_a_vector_approaching_at_45_degrees();
+void test_reflecting_a_vector_off_a_slanted_surface();
+void test_point_light_source();
+void test_default_material();
+void test_sphere_has_default_material();
+void test_sphere_may_be_assigned_a_material();
+void test_lighting_with_eye_between_light_and_surface();
+void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees();
+void test_lighting_with_eye_opposite_surface_light_offset_45_degrees();
+void test_lighting_with_eye_in_the_path_of_the_reflection_vector();
+void test_lighting_with_the_light_behind_the_surface();
 
 #endif

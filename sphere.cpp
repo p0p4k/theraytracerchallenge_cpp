@@ -28,8 +28,8 @@ std::vector<Intersection> Sphere::intersects(const Ray &incoming_ray) const {
   double t1 = (-b - sqrt_discriminant) / two_a;
   double t2 = (-b + sqrt_discriminant) / two_a;
 
-  Intersection i1(t1, id);
-  Intersection i2(t2, id);
+  Intersection i1(t1, this);
+  Intersection i2(t2, this);
   intersections.push_back(i1);
   intersections.push_back(i2);
 
@@ -39,4 +39,14 @@ std::vector<Intersection> Sphere::intersects(const Ray &incoming_ray) const {
 void Sphere::set_transform(const Matrix &transformation) {
   transform = transformation;
   inverse_transform = transformation.inverse();
+  inverse_transform_transpose = inverse_transform.transpose();
+}
+
+RayVector Sphere::normal_at(const RayPoint &p) const {
+  RayPoint object_point = inverse_transform.transform_point(p);
+  RayVector object_normal = object_point - RayPoint(0, 0, 0);
+  RayVector world_normal =
+      inverse_transform_transpose.transform_vector(object_normal);
+  world_normal.w = 0.0;
+  return world_normal.normalize();
 }

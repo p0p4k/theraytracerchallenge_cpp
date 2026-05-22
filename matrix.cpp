@@ -212,3 +212,13 @@ RayPoint Matrix::transform_point(const RayPoint &p) const {
 RayVector Matrix::transform_vector(const RayVector &v) const {
   return RayVector(this->tuple_multiply(v));
 }
+
+Matrix Matrix::chain_transforms(const std::initializer_list<Matrix> chain) {
+  auto end = chain.end();
+  Matrix id = Matrix::identity(4);
+  while (end != chain.begin()) {
+    --end;
+    id = end->matrix_multiply(id);
+  }
+  return id;
+}

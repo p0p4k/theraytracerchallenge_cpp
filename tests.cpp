@@ -1,9 +1,5 @@
 
 #include "tests.h"
-#include "intersection.h"
-#include "matrix.h"
-
-using std::stringstream;
 
 void test_tuple_to_point() {
   RayPoint p = RayPoint(4, -4, 3);
@@ -178,7 +174,7 @@ void test_canvas_to_ppm_header() {
   wh += " ";
   wh += std::to_string(c.height);
   std::string ppm = c.canvas_to_ppm();
-  stringstream ss(ppm);
+  std::stringstream ss(ppm);
   std::string line1, line2, line3;
 
   std::getline(ss, line1);
@@ -976,9 +972,7 @@ void test_sphere_ray_intersect_at_two_points() {
 
   assert(xs.size() == 2);
   assert(equal(xs[0].t, 4.0));
-  assert(xs[0].id == s.id);
   assert(equal(xs[1].t, 6.0));
-  assert(xs[1].id == s.id);
 
   std::cout << "[PASS 5.3] Ray intersects sphere at two points works."
             << std::endl;
@@ -992,9 +986,7 @@ void test_sphere_ray_intersect_at_tangent() {
 
   assert(xs.size() == 2);
   assert(equal(xs[0].t, 5.0));
-  assert(xs[0].id == s.id);
   assert(equal(xs[1].t, 5.0));
-  assert(xs[1].id == s.id);
 
   std::cout << "[PASS 5.4] Ray intersects sphere at a tangent works."
             << std::endl;
@@ -1019,9 +1011,7 @@ void test_sphere_behind_ray() {
 
   assert(xs.size() == 2);
   assert(equal(xs[0].t, -6.0));
-  assert(xs[0].id == s.id);
   assert(equal(xs[1].t, -4.0));
-  assert(xs[1].id == s.id);
 
   std::cout
       << "[PASS 5.6] Ray originating inside or in front of a sphere works."
@@ -1030,38 +1020,36 @@ void test_sphere_behind_ray() {
 
 void test_hit_all_positive_t() {
   Sphere s(1);
-  Intersection i1(1.0, s.id);
-  Intersection i2(2.0, s.id);
+  Intersection i1(1.0, &s);
+  Intersection i2(2.0, &s);
   std::vector<Intersection> xs = {i1, i2};
 
   const Intersection *i = hit(xs);
 
   assert(i != nullptr);
   assert(equal(i->t, 1.0));
-  assert(i->id == s.id);
 
   std::cout << "[PASS 5.7] Hit all positive works." << std::endl;
 }
 
 void test_hit_some_negative_t() {
   Sphere s(1);
-  Intersection i1(-1.0, s.id);
-  Intersection i2(1.0, s.id);
+  Intersection i1(-1.0, &s);
+  Intersection i2(1.0, &s);
   std::vector<Intersection> xs = {i1, i2};
 
   const Intersection *i = hit(xs);
 
   assert(i != nullptr);
   assert(equal(i->t, 1.0));
-  assert(i->id == s.id);
 
   std::cout << "[PASS 5.8] Hit some negative works." << std::endl;
 }
 
 void test_hit_all_negative_t() {
   Sphere s(1);
-  Intersection i1(-2.0, s.id);
-  Intersection i2(-1.0, s.id);
+  Intersection i1(-2.0, &s);
+  Intersection i2(-1.0, &s);
   std::vector<Intersection> xs = {i1, i2};
 
   const Intersection *i = hit(xs);
@@ -1073,17 +1061,16 @@ void test_hit_all_negative_t() {
 
 void test_hit_lowest_non_negative_t() {
   Sphere s(1);
-  Intersection i1(5.0, s.id);
-  Intersection i2(7.0, s.id);
-  Intersection i3(0.3, s.id);
-  Intersection i4(2.0, s.id);
+  Intersection i1(5.0, &s);
+  Intersection i2(7.0, &s);
+  Intersection i3(0.3, &s);
+  Intersection i4(2.0, &s);
   std::vector<Intersection> xs = {i1, i2, i3, i4};
 
   const Intersection *i = hit(xs);
 
   assert(i != nullptr);
   assert(equal(i->t, 0.3));
-  assert(i->id == s.id);
 
   std::cout << "[PASS 5.11] Hit lowest non negative works." << std::endl;
 }
@@ -1159,5 +1146,255 @@ void test_intersect_translated_sphere_with_ray() {
   assert(xs.size() == 0);
 
   std::cout << "[PASS 5.17] Intersecting a translated sphere with a ray works."
+            << std::endl;
+}
+
+void test_normal_on_sphere_at_point_on_x_axis() {
+  Sphere s(1);
+  RayVector n = s.normal_at(RayPoint(1, 0, 0));
+
+  assert(equal(n.x, 1.0));
+  assert(equal(n.y, 0.0));
+  assert(equal(n.z, 0.0));
+  assert(equal(n.w, 0.0));
+
+  std::cout << "[PASS 6.1] Normal on a sphere at a point on the X axis works."
+            << std::endl;
+}
+
+void test_normal_on_sphere_at_point_on_y_axis() {
+  Sphere s(1);
+  RayVector n = s.normal_at(RayPoint(0, 1, 0));
+
+  assert(equal(n.x, 0.0));
+  assert(equal(n.y, 1.0));
+  assert(equal(n.z, 0.0));
+  assert(equal(n.w, 0.0));
+
+  std::cout << "[PASS 6.2] Normal on a sphere at a point on the Y axis works."
+            << std::endl;
+}
+
+void test_normal_on_sphere_at_point_on_z_axis() {
+  Sphere s(1);
+  RayVector n = s.normal_at(RayPoint(0, 0, 1));
+
+  assert(equal(n.x, 0.0));
+  assert(equal(n.y, 0.0));
+  assert(equal(n.z, 1.0));
+  assert(equal(n.w, 0.0));
+
+  std::cout << "[PASS 6.3] Normal on a sphere at a point on the Z axis works."
+            << std::endl;
+}
+
+void test_normal_on_sphere_at_non_axial_point() {
+  Sphere s(1);
+  double val = std::sqrt(3) / 3.0;
+  RayVector n = s.normal_at(RayPoint(val, val, val));
+
+  assert(equal(n.x, val));
+  assert(equal(n.y, val));
+  assert(equal(n.z, val));
+  assert(equal(n.w, 0.0));
+
+  std::cout << "[PASS 6.4] Normal on a sphere at a non-axial point works."
+            << std::endl;
+}
+
+void test_normal_is_a_normalized_vector() {
+  Sphere s(1);
+  double val = std::sqrt(3) / 3.0;
+  RayVector n = s.normal_at(RayPoint(val, val, val));
+
+  double magnitude = std::sqrt(n.x * n.x + n.y * n.y + n.z * n.z);
+  assert(equal(magnitude, 1.0));
+
+  std::cout << "[PASS 6.5] The normal safely normalized works." << std::endl;
+}
+
+void test_computing_normal_on_translated_sphere() {
+  Sphere s(1);
+  s.set_transform(Matrix::translation(0, 1, 0));
+
+  RayVector n = s.normal_at(RayPoint(0, 1.70711, -0.70711));
+
+  assert(equal(n.x, 0.0));
+  assert(equal(n.y, 0.70711));
+  assert(equal(n.z, -0.70711));
+  assert(equal(n.w, 0.0));
+
+  std::cout << "[PASS 6.6] Computing the normal on a translated sphere works."
+            << std::endl;
+}
+
+void test_computing_normal_on_transformed_sphere() {
+  Sphere s(1);
+  Matrix m = Matrix::chain_transforms(
+      {Matrix::scaling(1, 0.5, 1), Matrix::rotation_z(0.785398)});
+  s.set_transform(m);
+
+  double val = std::sqrt(2) / 2.0;
+  RayVector n = s.normal_at(RayPoint(0, val, -val));
+
+  assert(equal(n.x, 0.0));
+  assert(equal(n.y, 0.97014));
+  assert(equal(n.z, -0.24254));
+  assert(equal(n.w, 0.0));
+
+  std::cout
+      << "[PASS 6.7] Computing the normal on a scaled and rotated sphere works."
+      << std::endl;
+}
+
+void test_reflecting_a_vector_approaching_at_45_degrees() {
+  RayVector v(1, -1, 0);
+  RayVector n(0, 1, 0);
+  RayVector r = v.reflect(n);
+
+  assert(equal(r.x, 1.0));
+  assert(equal(r.y, 1.0));
+  assert(equal(r.z, 0.0));
+  assert(equal(r.w, 0.0)); // Strict invariant check
+
+  std::cout << "[PASS 6.8] Reflecting a vector approaching at 45 degrees works."
+            << std::endl;
+}
+
+void test_reflecting_a_vector_off_a_slanted_surface() {
+  double val = std::sqrt(2) / 2.0;
+  RayVector v(0, -1, 0);
+  RayVector n(val, val, 0);
+  RayVector r = v.reflect(n);
+
+  assert(equal(r.x, 1.0));
+  assert(equal(r.y, 0.0));
+  assert(equal(r.z, 0.0));
+  assert(equal(r.w, 0.0));
+
+  std::cout << "[PASS 6.9] Reflecting a vector off a slanted surface works."
+            << std::endl;
+}
+
+void test_point_light_source() {
+  LightSource point_light;
+  assert(point_light.position == RayPoint(0, 0, 0));
+  assert(point_light.intensity == Color(0, 0, 0));
+
+  std::cout << "[PASS 6.10] Point light source works." << std::endl;
+}
+
+void test_default_material() {
+  Material m;
+
+  assert(equal(m.color.r, 1.0) && equal(m.color.g, 1.0) &&
+         equal(m.color.b, 1.0));
+  assert(equal(m.ambient, 0.1));
+  assert(equal(m.diffuse, 0.9));
+  assert(equal(m.specular, 0.9));
+  assert(equal(m.shininess, 200.0));
+
+  std::cout << "[PASS 6.11] Default material instantiation works." << std::endl;
+}
+
+void test_sphere_has_default_material() {
+  Sphere s;
+  Material m = s.material;
+
+  assert(equal(m.color.r, 1.0) && equal(m.color.g, 1.0) &&
+         equal(m.color.b, 1.0));
+  assert(equal(m.ambient, 0.1));
+  assert(equal(m.diffuse, 0.9));
+  assert(equal(m.specular, 0.9));
+  assert(equal(m.shininess, 200.0));
+
+  std::cout << "[PASS 6.12] A sphere safely defaults to a standard material."
+            << std::endl;
+}
+
+void test_sphere_may_be_assigned_a_material() {
+  Sphere s;
+  Material m;
+  m.ambient = 1.0;
+
+  s.material = m;
+
+  assert(equal(s.material.ambient, 1.0));
+  assert(equal(s.material.diffuse, 0.9));
+
+  std::cout << "[PASS 6.13] A sphere can be assigned a modified material "
+               "successfully."
+            << std::endl;
+}
+
+void test_lighting_with_eye_between_light_and_surface() {
+  LightingTestContext ctx;
+  RayVector eyev(0, 0, -1);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
+
+  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+
+  assert(equal(result.r, 1.9) && equal(result.g, 1.9) && equal(result.b, 1.9));
+  std::cout << "[PASS 6.14] Lighting with eye between light and surface works."
+            << std::endl;
+}
+
+void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees() {
+  LightingTestContext ctx;
+  double val = std::sqrt(2) / 2.0;
+  RayVector eyv(0, val, -val);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
+
+  Color result = light.lighting(ctx.m, ctx.position, eyv, normalv);
+
+  assert(equal(result.r, 1.0) && equal(result.g, 1.0) && equal(result.b, 1.0));
+  std::cout << "[PASS 6.15] Lighting with eye offset 45 degrees works."
+            << std::endl;
+}
+
+void test_lighting_with_eye_opposite_surface_light_offset_45_degrees() {
+  LightingTestContext ctx;
+  RayVector eyev(0, 0, -1);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1), RayPoint(0, 10, -10));
+
+  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+
+  assert(equal(result.r, 0.7364) && equal(result.g, 0.7364) &&
+         equal(result.b, 0.7364));
+  std::cout << "[PASS 6.16] Lighting with light source offset 45 degrees works."
+            << std::endl;
+}
+
+void test_lighting_with_eye_in_the_path_of_the_reflection_vector() {
+  LightingTestContext ctx;
+  double val = std::sqrt(2) / 2.0;
+  RayVector eyev(0, -val, -val);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1), RayPoint(0, 10, -10));
+
+  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+
+  assert(equal(result.r, 1.6364) && equal(result.g, 1.6364) &&
+         equal(result.b, 1.6364));
+  std::cout << "[PASS 6.17] Lighting with eye in the direct path of the "
+               "reflection vector works."
+            << std::endl;
+}
+
+void test_lighting_with_the_light_behind_the_surface() {
+  LightingTestContext ctx;
+  RayVector eyev(0, 0, -1);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1),
+                    RayPoint(0, 0, 10)); // Light behind the wall
+
+  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+
+  assert(equal(result.r, 0.1) && equal(result.g, 0.1) && equal(result.b, 0.1));
+  std::cout << "[PASS 6.18] Lighting with the light source completely behind "
+               "the surface works."
             << std::endl;
 }

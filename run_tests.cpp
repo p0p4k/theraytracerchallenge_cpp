@@ -64,4 +64,23 @@ void run_tests() {
   test_sphere_transformation();
   test_intersect_scaled_sphere_with_ray();
   test_intersect_translated_sphere_with_ray();
+
+  test_normal_on_sphere_at_point_on_x_axis();
+  test_normal_on_sphere_at_point_on_y_axis();
+  test_normal_on_sphere_at_point_on_z_axis();
+  test_normal_on_sphere_at_non_axial_point();
+  test_normal_is_a_normalized_vector();
+  test_computing_normal_on_translated_sphere();
+  test_computing_normal_on_transformed_sphere();
+  test_reflecting_a_vector_approaching_at_45_degrees();
+  test_reflecting_a_vector_off_a_slanted_surface();
+  test_point_light_source();
+  test_default_material();
+  test_sphere_has_default_material();
+  test_sphere_may_be_assigned_a_material();
+  test_lighting_with_eye_between_light_and_surface();
+  test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees();
+  test_lighting_with_eye_opposite_surface_light_offset_45_degrees();
+  test_lighting_with_eye_in_the_path_of_the_reflection_vector();
+  test_lighting_with_the_light_behind_the_surface();
 }

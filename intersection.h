@@ -2,11 +2,15 @@
 #define INTERSECTION_H
 
 #include <vector>
+
+class Sphere;
+
 class Intersection {
 public:
   double t;
   int id;
-  Intersection(double t, int id) : t(t), id(id) {}
+  const Sphere *object;
+  Intersection(double t, const Sphere *object) : t(t), object(object) {}
 };
 
 const Intersection *hit(const std::vector<Intersection> &Intersections);

@@ -12,17 +12,17 @@ struct Color {
     return equal(r, other.r) && equal(g, other.g) && equal(b, other.b);
   }
 
-  Color operator+(Color &other) const {
+  Color operator+(const Color &other) const {
     return Color(r + other.r, g + other.g, b + other.b);
   }
-  Color operator-(Color &other) const {
+  Color operator-(const Color &other) const {
     return Color(r - other.r, g - other.g, b - other.b);
   }
-  Color operator*(double scalar) const {
+  Color operator*(const double scalar) const {
     return Color(r * scalar, g * scalar, b * scalar);
   }
 
-  Color operator*(Color &other) const {
+  Color operator*(const Color &other) const {
     return Color(r * other.r, g * other.g, b * other.b);
   }
 };

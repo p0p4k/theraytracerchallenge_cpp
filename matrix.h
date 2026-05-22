@@ -3,6 +3,7 @@
 
 #include "tuple.h"
 #include "utilities.h"
+#include <initializer_list>
 #include <vector>
 
 class Matrix {
@@ -38,6 +39,7 @@ public:
                          double zy);
   RayPoint transform_point(const RayPoint &p) const;
   RayVector transform_vector(const RayVector &v) const;
+  static Matrix chain_transforms(const std::initializer_list<Matrix> chain);
 
   void print_matrix() const;
 };

@@ -33,11 +33,11 @@ RayTuple RayTuple::operator/(const double scalar) const {
 
 // point
 RayPoint::RayPoint(double x, double y, double z) : RayTuple(x, y, z, 1.0) {}
-RayPoint::RayPoint(const RayTuple &t) : RayTuple(t.x, t.y, t.z, t.w) {}
+RayPoint::RayPoint(const RayTuple &t) : RayTuple(t.x, t.y, t.z, 1.0) {}
 
 // vector
 RayVector::RayVector(double x, double y, double z) : RayTuple(x, y, z, 0.0) {}
-RayVector::RayVector(const RayTuple &t) : RayTuple(t.x, t.y, t.z, t.w) {}
+RayVector::RayVector(const RayTuple &t) : RayTuple(t.x, t.y, t.z, 0.0) {}
 
 RayVector RayVector::cross(const RayVector &other) const {
   return RayVector(y * other.z - z * other.y, z * other.x - x * other.z,
@@ -46,6 +46,10 @@ RayVector RayVector::cross(const RayVector &other) const {
 
 RayVector RayVector::normalize() const {
   return RayVector(RayTuple::normalize());
+}
+
+RayVector RayVector::reflect(const RayVector &normal) const {
+  return (*this) - (normal * 2.0) * (this->dot(normal));
 }
 
 // utilities

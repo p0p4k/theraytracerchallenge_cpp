@@ -43,6 +43,7 @@ public:
   RayVector(const RayTuple &t);
   RayVector cross(const RayVector &other) const;
   RayVector normalize() const;
+  RayVector reflect(const RayVector &normal) const;
 };
 
 inline bool operator==(const RayTuple &t1, const RayTuple &t2) {
