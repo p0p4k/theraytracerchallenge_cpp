@@ -1,21 +1,19 @@
+
 #include "tests.h"
-#include "tuple.h"
-#include <cmath>
-#include <iostream>
-#include <ostream>
-#include <sstream>
+#include "intersection.h"
+#include "matrix.h"
 
 using std::stringstream;
 
 void test_tuple_to_point() {
   RayPoint p = RayPoint(4, -4, 3);
-  assert((p == RayTuple(4, -4, 3, 1.0)) && "Point is not equal.");
+  assert(equal(p.w, 1.0) && "Point is not equal.");
   std::cout << "[PASS 1.1] Points equal." << std::endl;
 }
 
 void test_tuple_to_vector() {
   RayVector v = RayVector(4, -4, 3);
-  assert((v == RayTuple(4, -4, 3, 0.0)) && "Vector is not equal.");
+  assert(equal(v.w, 0.0) && "Vector is not equal.");
   std::cout << "[PASS 1.2] Vectors are equal." << std::endl;
 }
 
@@ -28,18 +26,18 @@ void test_tuple_addition() {
 }
 
 void test_point_minus_point() {
-  RayTuple s1 = RayPoint(3, 2, 1);
-  RayTuple s2 = RayPoint(5, 6, 7);
-  RayTuple s3 = s1 - s2;
+  RayPoint s1(3, 2, 1);
+  RayPoint s2(5, 6, 7);
+  RayVector s3 = s1 - s2;
   assert((s3 == RayVector(-2, -4, -6)) && "Point - Point failed.");
   std::cout << "[PASS 1.4] Point - Point subtraction works perfectly."
             << std::endl;
 }
 
 void test_point_minus_vector() {
-  RayTuple p1 = RayPoint(3, 2, 1);
-  RayTuple v2 = RayVector(5, 6, 7);
-  RayTuple x3 = p1 - v2;
+  RayPoint p1(3, 2, 1);
+  RayVector v2(5, 6, 7);
+  RayPoint x3 = p1 - v2;
   assert((x3 == RayPoint(-2, -4, -6)) && "Point - Vector failed.");
   std::cout << "[PASS 1.5] Point - Vector subtraction works perfectly."
             << std::endl;
@@ -92,14 +90,14 @@ void test_magnitude_of_vector() {
 }
 
 void test_normalize_vector() {
-  RayVector v = RayVector(4, 0, 0);
+  RayVector v(4, 0, 0);
   assert(v.normalize() == RayVector(1, 0, 0) && "normalize failed.");
 
-  RayVector v1 = RayVector(1, 2, 3);
+  RayVector v1(1, 2, 3);
   assert(v1.normalize() == RayVector(0.26726, 0.53452, 0.80178) &&
          "normalize failed.");
 
-  RayVector v2 = RayVector(1, 2, 3);
+  RayVector v2(1, 2, 3);
   RayTuple v2_norm = v2.normalize();
   assert(equal(v2_norm.magnitude(), 1.0) &&
          "magnitude of norm vector is one, failed.");
@@ -947,5 +945,219 @@ void test_individual_and_chained_transformations() {
   assert(equal(chained_result.w, 1.0));
 
   std::cout << "[PASS 4.8] Individual and chained transformations works."
+            << std::endl;
+}
+
+void test_create_and_query_ray() {
+  RayPoint origin(0, 0, 0);
+  RayVector direction(4, 5, 6);
+  Ray r(origin, direction);
+
+  assert(r.origin == origin);
+  assert(r.direction == direction);
+
+  std::cout << "[PASS 5.1] Ray create and query works." << std::endl;
+}
+
+void test_ray_point_from_dist() {
+  Ray r(RayPoint(2, 3, 4), RayVector(1, 0, 0));
+  assert(r.position(0) == RayPoint(2, 3, 4));
+  assert(r.position(1) == RayPoint(3, 3, 4));
+  assert(r.position(-1) == RayPoint(1, 3, 4));
+  assert(r.position(2.5) == RayPoint(4.5, 3, 4));
+
+  std::cout << "[PASS 5.2] Ray point fron dist works." << std::endl;
+}
+
+void test_sphere_ray_intersect_at_two_points() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Sphere s(1);
+  std::vector<Intersection> xs = s.intersects(r);
+
+  assert(xs.size() == 2);
+  assert(equal(xs[0].t, 4.0));
+  assert(xs[0].id == s.id);
+  assert(equal(xs[1].t, 6.0));
+  assert(xs[1].id == s.id);
+
+  std::cout << "[PASS 5.3] Ray intersects sphere at two points works."
+            << std::endl;
+}
+
+void test_sphere_ray_intersect_at_tangent() {
+  Ray r(RayPoint(0, 1, -5), RayVector(0, 0, 1));
+  Sphere s(1);
+
+  std::vector<Intersection> xs = s.intersects(r);
+
+  assert(xs.size() == 2);
+  assert(equal(xs[0].t, 5.0));
+  assert(xs[0].id == s.id);
+  assert(equal(xs[1].t, 5.0));
+  assert(xs[1].id == s.id);
+
+  std::cout << "[PASS 5.4] Ray intersects sphere at a tangent works."
+            << std::endl;
+}
+
+void test_sphere_ray_miss() {
+  Ray r(RayPoint(0, 2, -5), RayVector(0, 0, 1));
+  Sphere s(1);
+
+  std::vector<Intersection> xs = s.intersects(r);
+
+  assert(xs.size() == 0);
+
+  std::cout << "[PASS 5.5] Ray missing a sphere works." << std::endl;
+}
+
+void test_sphere_behind_ray() {
+  Ray r(RayPoint(0, 0, 5), RayVector(0, 0, 1));
+  Sphere s(1);
+
+  std::vector<Intersection> xs = s.intersects(r);
+
+  assert(xs.size() == 2);
+  assert(equal(xs[0].t, -6.0));
+  assert(xs[0].id == s.id);
+  assert(equal(xs[1].t, -4.0));
+  assert(xs[1].id == s.id);
+
+  std::cout
+      << "[PASS 5.6] Ray originating inside or in front of a sphere works."
+      << std::endl;
+}
+
+void test_hit_all_positive_t() {
+  Sphere s(1);
+  Intersection i1(1.0, s.id);
+  Intersection i2(2.0, s.id);
+  std::vector<Intersection> xs = {i1, i2};
+
+  const Intersection *i = hit(xs);
+
+  assert(i != nullptr);
+  assert(equal(i->t, 1.0));
+  assert(i->id == s.id);
+
+  std::cout << "[PASS 5.7] Hit all positive works." << std::endl;
+}
+
+void test_hit_some_negative_t() {
+  Sphere s(1);
+  Intersection i1(-1.0, s.id);
+  Intersection i2(1.0, s.id);
+  std::vector<Intersection> xs = {i1, i2};
+
+  const Intersection *i = hit(xs);
+
+  assert(i != nullptr);
+  assert(equal(i->t, 1.0));
+  assert(i->id == s.id);
+
+  std::cout << "[PASS 5.8] Hit some negative works." << std::endl;
+}
+
+void test_hit_all_negative_t() {
+  Sphere s(1);
+  Intersection i1(-2.0, s.id);
+  Intersection i2(-1.0, s.id);
+  std::vector<Intersection> xs = {i1, i2};
+
+  const Intersection *i = hit(xs);
+
+  assert(i == nullptr);
+
+  std::cout << "[PASS 5.10] Hit all negative works." << std::endl;
+}
+
+void test_hit_lowest_non_negative_t() {
+  Sphere s(1);
+  Intersection i1(5.0, s.id);
+  Intersection i2(7.0, s.id);
+  Intersection i3(0.3, s.id);
+  Intersection i4(2.0, s.id);
+  std::vector<Intersection> xs = {i1, i2, i3, i4};
+
+  const Intersection *i = hit(xs);
+
+  assert(i != nullptr);
+  assert(equal(i->t, 0.3));
+  assert(i->id == s.id);
+
+  std::cout << "[PASS 5.11] Hit lowest non negative works." << std::endl;
+}
+
+void test_translating_a_ray() {
+  Ray r(RayPoint(1, 2, 3), RayVector(0, 1, 0));
+  Matrix m = Matrix::translation(3, 4, 5);
+
+  Ray r2 = r.transform(m);
+
+  assert(equal(r2.origin.x, 4.0));
+  assert(equal(r2.origin.y, 6.0));
+  assert(equal(r2.origin.z, 8.0));
+  assert(equal(r2.direction.x, 0.0));
+  assert(equal(r2.direction.y, 1.0));
+  assert(equal(r2.direction.z, 0.0));
+
+  std::cout << "[PASS 5.12] Translating a ray works." << std::endl;
+}
+
+void test_scaling_a_ray() {
+  Ray r(RayPoint(1, 2, 3), RayVector(0, 1, 0));
+  Matrix m = Matrix::scaling(2, 3, 4);
+
+  Ray r2 = r.transform(m);
+
+  assert(equal(r2.origin.x, 2.0));
+  assert(equal(r2.origin.y, 6.0));
+  assert(equal(r2.origin.z, 12.0));
+  assert(equal(r2.direction.x, 0.0));
+  assert(equal(r2.direction.y, 3.0));
+  assert(equal(r2.direction.z, 0.0));
+
+  std::cout << "[PASS 5.13] Scaling a ray works." << std::endl;
+}
+
+void test_sphere_default_transformation() {
+  Sphere s(1);
+  assert(s.transform == Matrix::identity(4));
+
+  std::cout << "[PASS 5.14] Sphere default transformation works." << std::endl;
+}
+
+void test_sphere_transformation() {
+  Sphere s(1);
+  Matrix t = Matrix::translation(2, 3, 4);
+  s.set_transform(t);
+  assert(s.transform == t);
+
+  std::cout << "[PASS 5.15] Sphere translation transformation works."
+            << std::endl;
+}
+
+void test_intersect_scaled_sphere_with_ray() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Sphere s(1);
+  s.set_transform(Matrix::scaling(2, 2, 2));
+  std::vector<Intersection> xs = s.intersects(r);
+
+  assert(xs.size() == 2);
+  assert(xs[0].t == 3.0);
+  assert(xs[1].t == 7.0);
+
+  std::cout << "[PASS 5.16] Sphere scaled intersection works." << std::endl;
+}
+
+void test_intersect_translated_sphere_with_ray() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Sphere s(1);
+  s.set_transform(Matrix::translation(5, 0, 0));
+  std::vector<Intersection> xs = s.intersects(r);
+
+  assert(xs.size() == 0);
+
+  std::cout << "[PASS 5.17] Intersecting a translated sphere with a ray works."
             << std::endl;
 }

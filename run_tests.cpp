@@ -47,4 +47,21 @@ void run_tests() {
   test_matrix_rotation_x_inverse();
   test_matrix_shearing();
   test_individual_and_chained_transformations();
+
+  test_create_and_query_ray();
+  test_ray_point_from_dist();
+  test_sphere_ray_intersect_at_two_points();
+  test_sphere_ray_intersect_at_tangent();
+  test_sphere_ray_miss();
+  test_sphere_behind_ray();
+  test_hit_all_positive_t();
+  test_hit_some_negative_t();
+  test_hit_all_negative_t();
+  test_hit_lowest_non_negative_t();
+  test_translating_a_ray();
+  test_scaling_a_ray();
+  test_sphere_default_transformation();
+  test_sphere_transformation();
+  test_intersect_scaled_sphere_with_ray();
+  test_intersect_translated_sphere_with_ray();
 }

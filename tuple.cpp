@@ -17,29 +17,16 @@ void RayTuple::print_tuple() const {
             << std::endl;
 }
 
-bool RayTuple::operator==(const RayTuple &other) const {
-  return equal(x, other.x) && equal(y, other.y) && equal(z, other.z) &&
-         equal(w, other.w);
-}
-
-bool RayTuple::operator!=(const RayTuple &other) const {
-  return !(*this == other);
-}
-
 RayTuple RayTuple::operator-(const RayTuple &other) const {
   return RayTuple(x - other.x, y - other.y, z - other.z, w - other.w);
 }
-
 RayTuple RayTuple::operator+(const RayTuple &other) const {
   return RayTuple(x + other.x, y + other.y, z + other.z, w + other.w);
 }
-
 RayTuple RayTuple::operator-() const { return RayTuple(-x, -y, -z, -w); }
-
 RayTuple RayTuple::operator*(const double scalar) const {
   return RayTuple(x * scalar, y * scalar, z * scalar, w * scalar);
 }
-
 RayTuple RayTuple::operator/(const double scalar) const {
   return RayTuple(x / scalar, y / scalar, z / scalar, w / scalar);
 }
@@ -55,6 +42,10 @@ RayVector::RayVector(const RayTuple &t) : RayTuple(t.x, t.y, t.z, t.w) {}
 RayVector RayVector::cross(const RayVector &other) const {
   return RayVector(y * other.z - z * other.y, z * other.x - x * other.z,
                    x * other.y - y * other.x);
+}
+
+RayVector RayVector::normalize() const {
+  return RayVector(RayTuple::normalize());
 }
 
 // utilities

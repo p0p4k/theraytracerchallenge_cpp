@@ -15,8 +15,7 @@ struct Environment {
 };
 
 Projectile tick_projectile(const Environment &e, const Projectile &p) {
-  return Projectile(RayPoint(p.position + p.velocity),
-                    RayVector(p.velocity + e.gravity + e.wind));
+  return Projectile(p.position + p.velocity, p.velocity + e.gravity + e.wind);
 }
 
 int main() {
