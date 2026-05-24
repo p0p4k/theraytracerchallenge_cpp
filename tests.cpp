@@ -1,5 +1,11 @@
 
 #include "tests.h"
+#include "camera.h"
+#include "intersection.h"
+#include "light_source.h"
+#include "tuple.h"
+#include "world.h"
+#include <vector>
 
 void test_tuple_to_point() {
   RayPoint p = RayPoint(4, -4, 3);
@@ -1397,4 +1403,216 @@ void test_lighting_with_the_light_behind_the_surface() {
   std::cout << "[PASS 6.18] Lighting with the light source completely behind "
                "the surface works."
             << std::endl;
+}
+
+void test_world_empty_on_creation() {
+  World w;
+  assert((w.objects.size() == 0));
+  assert((w.light_source == nullptr));
+
+  std::cout << "[PASS 7.1] World empty on creation works." << std::endl;
+}
+
+void test_default_world() {
+  DefaultWorld w;
+  assert(*w.light_source ==
+         LightSource(Color(1, 1, 1), RayPoint(-10, 10, -10)));
+  assert(w.objects.size() == 2);
+  assert(w.objects[0]->material.color == Color(0.8, 1.0, 0.6));
+  assert(equal(w.objects[0]->material.diffuse, 0.7));
+  assert(equal(w.objects[0]->material.specular, 0.2));
+  assert(w.objects[1]->transform == Matrix::scaling(0.5, 0.5, 0.5));
+
+  std::cout << "[PASS 7.2] Default world configuration works." << std::endl;
+}
+
+void test_intersect_world_with_ray() {
+  DefaultWorld w;
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  std::vector<Intersection> xs = w.intersect_world(r);
+  assert(xs.size() == 4);
+  assert(equal(xs[0].t, 4.0));
+  assert(equal(xs[1].t, 4.5));
+  assert(equal(xs[2].t, 5.5));
+  assert(equal(xs[3].t, 6.0));
+
+  std::cout << "[PASS 7.3] Default world intersect with ray works."
+            << std::endl;
+}
+
+void test_precomputing_state_of_intersection() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Sphere s;
+  Intersection i(4.0, &s);
+
+  Computations comps(i, r);
+  assert(equal(comps.t, i.t));
+  assert(comps.object == i.object);
+  assert(comps.point == RayPoint(0, 0, -1));
+  assert(comps.eyev == RayVector(0, 0, -1));
+  assert(comps.normalv == RayVector(0, 0, -1));
+  assert(comps.inside == false);
+  std::cout << "[PASS 7.4] Precomputing intersection state works (outside hit)."
+            << std::endl;
+}
+
+void test_precomputing_state_of_intersection_inside() {
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 0, 1));
+  Sphere s;
+  Intersection i(1.0, &s);
+
+  Computations comps(i, r);
+  assert(comps.point == RayPoint(0, 0, 1));
+  assert(comps.eyev == RayVector(0, 0, -1));
+  assert(comps.inside == true);
+  assert(comps.normalv == RayVector(0, 0, -1));
+  std::cout << "[PASS 7.5] Precomputing intersection state works (inside hit)."
+            << std::endl;
+}
+
+void test_shading_an_intersection() {
+  DefaultWorld w;
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Intersection i(4.0, w.objects[0]);
+
+  Computations comps(i, r);
+  Color c = w.shade_hit(comps);
+  assert(equal(c.r, 0.38066) && equal(c.g, 0.47583) && equal(c.b, 0.2855));
+  std::cout << "[PASS 7.6] Shading an intersection works." << std::endl;
+}
+
+void test_shading_an_intersection_from_the_inside() {
+  DefaultWorld w;
+  delete w.light_source;
+  w.light_source = new LightSource(Color(1, 1, 1), RayPoint(0, 0.25, 0));
+
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 0, 1));
+  Intersection i(0.5, w.objects[1]);
+
+  Computations comps(i, r);
+  Color c = w.shade_hit(comps);
+  assert(equal(c.r, 0.90498) && equal(c.g, 0.90498) && equal(c.b, 0.90498));
+  std::cout << "[PASS 7.7] Shading an intersection from the inside works."
+            << std::endl;
+}
+
+void test_color_at_ray_misses() {
+  DefaultWorld w;
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 1, 0));
+  Color c = w.color_at(r);
+  assert(equal(c.r, 0.0) && equal(c.g, 0.0) && equal(c.b, 0.0));
+  std::cout << "[PASS 7.8] color_at when a ray misses returns black."
+            << std::endl;
+}
+
+void test_color_at_ray_hits() {
+  DefaultWorld w;
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Color c = w.color_at(r);
+  assert(equal(c.r, 0.38066) && equal(c.g, 0.47583) && equal(c.b, 0.2855));
+  std::cout << "[PASS 7.9] color_at when a ray hits returns correct color."
+            << std::endl;
+}
+
+void test_color_with_intersection_behind_the_ray() {
+  DefaultWorld w;
+
+  const_cast<Sphere *>(w.objects[0])->material.ambient = 1.0;
+  const_cast<Sphere *>(w.objects[1])->material.ambient = 1.0;
+
+  Ray r(RayPoint(0, 0, 0.75), RayVector(0, 0, -1));
+  Color c = w.color_at(r);
+
+  assert(equal(c.r, 1.0) && equal(c.g, 1.0) && equal(c.b, 1.0));
+  std::cout << "[PASS 7.10] color_at with an intersection behind the ray works."
+            << std::endl;
+}
+
+void test_view_transformation_default() {
+  RayPoint from(0, 0, 0);
+  RayPoint to(0, 0, -1);
+  RayVector up(0, 1, 0);
+
+  Matrix t = Matrix::view_transform(from, to, up);
+  assert(t == Matrix::identity(4));
+  std::cout << "[PASS 7.11] Default view transform works." << std::endl;
+}
+
+void test_view_transformation_positive_z() {
+  RayPoint from(0, 0, 0);
+  RayPoint to(0, 0, 1);
+  RayVector up(0, 1, 0);
+
+  Matrix t = Matrix::view_transform(from, to, up);
+  assert(t == Matrix::scaling(-1, 1, -1));
+  std::cout << "[PASS 7.12] View transform looking at positive Z works."
+            << std::endl;
+}
+
+void test_view_transformation_translation() {
+  RayPoint from(0, 0, 8);
+  RayPoint to(0, 0, 0);
+  RayVector up(0, 1, 0);
+
+  Matrix t = Matrix::view_transform(from, to, up);
+  assert(t == Matrix::translation(0, 0, -8));
+  std::cout << "[PASS 7.13] View transform translation works." << std::endl;
+}
+
+void test_pixel_size_horizontal() {
+  Camera c(200, 125, M_PI / 2.0);
+  assert(equal(c.pixel_size, 0.01));
+  std::cout << "[PASS 7.14] Horizontal camera pixel size calculation works."
+            << std::endl;
+}
+
+void test_pixel_size_vertical() {
+  Camera c(125, 200, M_PI / 2.0);
+  assert(equal(c.pixel_size, 0.01));
+  std::cout << "[PASS 7.15] Vertical camera pixel size calculation works."
+            << std::endl;
+}
+
+void test_ray_through_center_of_canvas() {
+  Camera c(201, 101, M_PI / 2.0);
+  Ray r = c.ray_for_pixel(100, 50);
+  assert(r.origin == RayPoint(0, 0, 0));
+  assert(r.direction == RayVector(0, 0, -1));
+  std::cout << "[PASS 7.16] Ray through canvas center works." << std::endl;
+}
+
+void test_ray_through_corner_of_canvas() {
+  Camera c(201, 101, M_PI / 2.0);
+  Ray r = c.ray_for_pixel(0, 0);
+  assert(r.origin == RayPoint(0, 0, 0));
+  assert(r.direction == RayVector(0.66519, 0.33259, -0.66851));
+  std::cout << "[PASS 7.17] Ray through canvas corner works." << std::endl;
+}
+
+void test_ray_with_transformed_camera() {
+  Camera c(201, 101, M_PI / 2.0);
+  c.transform = Matrix::rotation_y(M_PI / 4.0)
+                    .matrix_multiply(Matrix::translation(0, -2, 5));
+  Ray r = c.ray_for_pixel(100, 50);
+  assert(r.origin == RayPoint(0, 2, -5));
+  assert(r.direction == RayVector(sqrt(2) / 2.0, 0, -sqrt(2) / 2.0));
+  std::cout << "[PASS 7.18] Ray with transformed camera works." << std::endl;
+}
+
+void test_rendering_a_world_with_a_camera() {
+  DefaultWorld w;
+  Camera c(11, 11, M_PI / 2.0);
+
+  RayPoint from(0, 0, -5);
+  RayPoint to(0, 0, 0);
+  RayVector up(0, 1, 0);
+  c.transform = Matrix::view_transform(from, to, up);
+
+  Canvas image = c.render(w);
+  Color center_pixel = image.pixel_at(5, 5);
+
+  assert(equal(center_pixel.r, 0.38066));
+  assert(equal(center_pixel.g, 0.47583));
+  assert(equal(center_pixel.b, 0.2855));
+  std::cout << "[PASS 7.19] Full world rendering pipeline works." << std::endl;
 }

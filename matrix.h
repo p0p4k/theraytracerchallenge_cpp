@@ -40,6 +40,8 @@ public:
   RayPoint transform_point(const RayPoint &p) const;
   RayVector transform_vector(const RayVector &v) const;
   static Matrix chain_transforms(const std::initializer_list<Matrix> chain);
+  static Matrix view_transform(const RayPoint &from, const RayPoint &to,
+                               const RayVector &up);
 
   void print_matrix() const;
 };

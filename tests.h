@@ -100,4 +100,22 @@ void test_lighting_with_eye_opposite_surface_light_offset_45_degrees();
 void test_lighting_with_eye_in_the_path_of_the_reflection_vector();
 void test_lighting_with_the_light_behind_the_surface();
 
+void test_world_empty_on_creation();
+void test_default_world();
+void test_intersect_world_with_ray();
+void test_shading_an_intersection();
+void test_shading_an_intersection_from_the_inside();
+void test_color_at_ray_misses();
+void test_color_at_ray_hits();
+void test_color_with_intersection_behind_the_ray();
+void test_view_transformation_default();
+void test_view_transformation_positive_z();
+void test_view_transformation_translation();
+void test_pixel_size_horizontal();
+void test_pixel_size_vertical();
+void test_ray_through_center_of_canvas();
+void test_ray_through_corner_of_canvas();
+void test_ray_with_transformed_camera();
+void test_rendering_a_world_with_a_camera();
+
 #endif

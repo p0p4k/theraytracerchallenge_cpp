@@ -4,6 +4,7 @@
 #include "color.h"
 #include "material.h"
 #include "tuple.h"
+
 class LightSource {
 public:
   Color intensity;
@@ -13,5 +14,7 @@ public:
 
   Color lighting(const Material &m, const RayPoint &p, const RayVector &eyev,
                  const RayVector &normalv) const;
+
+  bool operator==(const LightSource &other) const;
 };
 #endif

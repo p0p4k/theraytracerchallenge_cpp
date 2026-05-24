@@ -83,4 +83,22 @@ void run_tests() {
   test_lighting_with_eye_opposite_surface_light_offset_45_degrees();
   test_lighting_with_eye_in_the_path_of_the_reflection_vector();
   test_lighting_with_the_light_behind_the_surface();
+
+  test_world_empty_on_creation();
+  test_default_world();
+  test_intersect_world_with_ray();
+  test_shading_an_intersection();
+  test_shading_an_intersection_from_the_inside();
+  test_color_at_ray_misses();
+  test_color_at_ray_hits();
+  test_color_with_intersection_behind_the_ray();
+  test_view_transformation_default();
+  test_view_transformation_positive_z();
+  test_view_transformation_translation();
+  test_pixel_size_horizontal();
+  test_pixel_size_vertical();
+  test_ray_through_center_of_canvas();
+  test_ray_through_corner_of_canvas();
+  test_ray_with_transformed_camera();
+  test_rendering_a_world_with_a_camera();
 }

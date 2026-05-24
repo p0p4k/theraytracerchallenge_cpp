@@ -222,3 +222,30 @@ Matrix Matrix::chain_transforms(const std::initializer_list<Matrix> chain) {
   }
   return id;
 }
+
+Matrix Matrix::view_transform(const RayPoint &from, const RayPoint &to,
+                              const RayVector &up) {
+  RayVector forward = (to - from).normalize();
+  RayVector upn = up.normalize();
+  RayVector left = forward.cross(upn);
+  RayVector true_up = left.cross(forward);
+
+  Matrix orientation(4, 4);
+
+  orientation[0][0] = left.x;
+  orientation[0][1] = left.y;
+  orientation[0][2] = left.z;
+
+  orientation[1][0] = true_up.x;
+  orientation[1][1] = true_up.y;
+  orientation[1][2] = true_up.z;
+
+  orientation[2][0] = -forward.x;
+  orientation[2][1] = -forward.y;
+  orientation[2][2] = -forward.z;
+
+  orientation[3][3] = 1.0;
+
+  return orientation.matrix_multiply(
+      Matrix::translation(-from.x, -from.y, -from.z));
+}

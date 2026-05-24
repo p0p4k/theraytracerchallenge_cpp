@@ -37,3 +37,7 @@ Color LightSource::lighting(const Material &m, const RayPoint &p,
 
   return ambient + diffuse + specular;
 }
+
+bool LightSource::operator==(const LightSource &other) const {
+  return this->intensity == other.intensity && this->position == other.position;
+}
