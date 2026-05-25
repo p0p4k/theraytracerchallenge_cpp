@@ -6,13 +6,14 @@
 Computations::Computations(const Intersection &intersection, const Ray &ray)
     : t(intersection.t), object(intersection.object),
       point(ray.position(intersection.t)), eyev(-ray.direction),
-      normalv(intersection.object->normal_at(ray.position(intersection.t))) {
+      normalv(intersection.object->normal_at(point)) {
   if (normalv.dot(eyev) < 0.0) {
     inside = true;
     normalv = -normalv;
   } else {
     inside = false;
   }
+  over_point = point + normalv * EPSILON;
 }
 
 World::World() : light_source(nullptr) {}
@@ -40,12 +41,20 @@ std::vector<Intersection> World::intersect_world(const Ray &r) const {
   return xs;
 }
 
-Color World::shade_hit(const Computations &comps) const {
+Color World::shade_hit(const Computations &comps,
+                       const bool dont_shadow) const {
   if (light_source == nullptr)
     return Color(0, 0, 0);
 
+  bool in_shadow = false;
+  if (!dont_shadow) {
+    if (is_shadowed(comps.over_point)) {
+      in_shadow = true;
+    }
+  }
+
   return light_source->lighting(comps.object->material, comps.point, comps.eyev,
-                                comps.normalv);
+                                comps.normalv, in_shadow);
 }
 
 Color World::color_at(const Ray &ray) const {
@@ -56,7 +65,7 @@ Color World::color_at(const Ray &ray) const {
   }
 
   Computations comps(*closest_hit, ray);
-  return shade_hit(comps);
+  return shade_hit(comps, false);
 }
 
 DefaultWorld::DefaultWorld() {
@@ -71,4 +80,19 @@ DefaultWorld::DefaultWorld() {
   Sphere *s2 = new Sphere();
   s2->set_transform(Matrix::scaling(0.5, 0.5, 0.5));
   objects.push_back(s2);
+}
+
+bool World::is_shadowed(const RayPoint &p) const {
+  RayVector v = light_source->position - p;
+  double distance = v.magnitude();
+  RayVector direction = v.normalize();
+
+  Ray r(p, direction);
+  std::vector<Intersection> intersections = intersect_world(r);
+
+  const Intersection *i = hit(intersections);
+  if (i && i->t < distance) {
+    return true;
+  }
+  return false;
 }

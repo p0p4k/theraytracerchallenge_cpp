@@ -101,4 +101,11 @@ void run_tests() {
   test_ray_through_corner_of_canvas();
   test_ray_with_transformed_camera();
   test_rendering_a_world_with_a_camera();
+
+  test_lighting_with_surface_in_shadow();
+  test_no_shadow_collinear_point_and_light();
+  test_is_shadowed_with_obstruction();
+  test_is_shadowed_object_behind_light();
+  test_is_shadowed_object_behind_point();
+  test_hit_offset_point();
 }

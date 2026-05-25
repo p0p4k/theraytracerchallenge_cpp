@@ -13,7 +13,7 @@ public:
       : intensity(i), position(p) {};
 
   Color lighting(const Material &m, const RayPoint &p, const RayVector &eyev,
-                 const RayVector &normalv) const;
+                 const RayVector &normalv, const bool in_shadow = false) const;
 
   bool operator==(const LightSource &other) const;
 };

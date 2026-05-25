@@ -5,7 +5,8 @@
 #include "matrix.h"
 #include "ray.h"
 #include "world.h"
-#include <chrono>
+#include <cmath>
+
 class Camera {
 public:
   int hsize;

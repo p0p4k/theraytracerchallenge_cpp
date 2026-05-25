@@ -3,7 +3,9 @@
 #include "camera.h"
 #include "intersection.h"
 #include "light_source.h"
+#include "matrix.h"
 #include "tuple.h"
+#include "utilities.h"
 #include "world.h"
 #include <vector>
 
@@ -1334,12 +1336,13 @@ void test_sphere_may_be_assigned_a_material() {
 }
 
 void test_lighting_with_eye_between_light_and_surface() {
-  LightingTestContext ctx;
+  Material m;
+  RayPoint position(0, 0, 0);
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
 
-  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+  Color result = light.lighting(m, position, eyev, normalv);
 
   assert(equal(result.r, 1.9) && equal(result.g, 1.9) && equal(result.b, 1.9));
   std::cout << "[PASS 6.14] Lighting with eye between light and surface works."
@@ -1347,13 +1350,14 @@ void test_lighting_with_eye_between_light_and_surface() {
 }
 
 void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees() {
-  LightingTestContext ctx;
+  Material m;
+  RayPoint position(0, 0, 0);
   double val = std::sqrt(2) / 2.0;
   RayVector eyv(0, val, -val);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
 
-  Color result = light.lighting(ctx.m, ctx.position, eyv, normalv);
+  Color result = light.lighting(m, position, eyv, normalv);
 
   assert(equal(result.r, 1.0) && equal(result.g, 1.0) && equal(result.b, 1.0));
   std::cout << "[PASS 6.15] Lighting with eye offset 45 degrees works."
@@ -1361,12 +1365,13 @@ void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees() {
 }
 
 void test_lighting_with_eye_opposite_surface_light_offset_45_degrees() {
-  LightingTestContext ctx;
+  Material m;
+  RayPoint position(0, 0, 0);
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 10, -10));
 
-  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+  Color result = light.lighting(m, position, eyev, normalv);
 
   assert(equal(result.r, 0.7364) && equal(result.g, 0.7364) &&
          equal(result.b, 0.7364));
@@ -1375,13 +1380,14 @@ void test_lighting_with_eye_opposite_surface_light_offset_45_degrees() {
 }
 
 void test_lighting_with_eye_in_the_path_of_the_reflection_vector() {
-  LightingTestContext ctx;
+  Material m;
+  RayPoint position(0, 0, 0);
   double val = std::sqrt(2) / 2.0;
   RayVector eyev(0, -val, -val);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 10, -10));
 
-  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+  Color result = light.lighting(m, position, eyev, normalv);
 
   assert(equal(result.r, 1.6364) && equal(result.g, 1.6364) &&
          equal(result.b, 1.6364));
@@ -1391,13 +1397,14 @@ void test_lighting_with_eye_in_the_path_of_the_reflection_vector() {
 }
 
 void test_lighting_with_the_light_behind_the_surface() {
-  LightingTestContext ctx;
+  Material m;
+  RayPoint position(0, 0, 0);
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1),
                     RayPoint(0, 0, 10)); // Light behind the wall
 
-  Color result = light.lighting(ctx.m, ctx.position, eyev, normalv);
+  Color result = light.lighting(m, position, eyev, normalv);
 
   assert(equal(result.r, 0.1) && equal(result.g, 0.1) && equal(result.b, 0.1));
   std::cout << "[PASS 6.18] Lighting with the light source completely behind "
@@ -1615,4 +1622,65 @@ void test_rendering_a_world_with_a_camera() {
   assert(equal(center_pixel.g, 0.47583));
   assert(equal(center_pixel.b, 0.2855));
   std::cout << "[PASS 7.19] Full world rendering pipeline works." << std::endl;
+}
+
+void test_lighting_with_surface_in_shadow() {
+  RayVector eyev(0, 0, -1);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
+  bool in_shadow = true;
+  Material m;
+  RayPoint position(0, 0, 0);
+  Color result = light.lighting(m, position, eyev, normalv, in_shadow);
+
+  assert(result == Color(0.1, 0.1, 0.1));
+
+  std::cout << "[PASS 8.1] Lighting with surface in shadow basic works."
+            << std::endl;
+}
+
+void test_no_shadow_collinear_point_and_light() {
+  DefaultWorld w;
+  RayPoint p(0, 10, 0);
+  assert(w.is_shadowed(p) == false);
+
+  std::cout << "[PASS 8.2] No shadow in collinear works." << std::endl;
+}
+
+void test_is_shadowed_with_obstruction() {
+  DefaultWorld w;
+  RayPoint p(10, -10, 10);
+  assert(w.is_shadowed(p) == true);
+  std::cout << "[PASS 8.3] Shadow detected when object blocks light."
+            << std::endl;
+}
+
+void test_is_shadowed_object_behind_light() {
+  DefaultWorld w;
+  RayPoint p(-20, 20, -20);
+  assert(w.is_shadowed(p) == false);
+
+  std::cout << "[PASS 8.4] No shadow when object is behind the light source."
+            << std::endl;
+}
+
+void test_is_shadowed_object_behind_point() {
+  DefaultWorld w;
+  RayPoint p(-2, 2, -2);
+  assert(w.is_shadowed(p) == false);
+
+  std::cout << "[PASS 8.5] No shadow when object is behind point." << std::endl;
+}
+
+void test_hit_offset_point() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Sphere s;
+  s.set_transform(Matrix::translation(0, 0, 1));
+  Intersection i(5, &s);
+  Computations comps(i, r);
+
+  assert(comps.over_point.z < -EPSILON / 2.0);
+  assert(comps.point.z > comps.over_point.z);
+
+  std::cout << "[PASS 8.6] Hit offsets the point works." << std::endl;
 }

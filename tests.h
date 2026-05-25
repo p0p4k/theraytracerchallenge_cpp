@@ -8,7 +8,6 @@
 #include "matrix.h"
 #include "ray.h"
 #include "sphere.h"
-#include "test_helpers.h"
 #include "tuple.h"
 #include "utilities.h"
 #include <cmath>
@@ -117,5 +116,12 @@ void test_ray_through_center_of_canvas();
 void test_ray_through_corner_of_canvas();
 void test_ray_with_transformed_camera();
 void test_rendering_a_world_with_a_camera();
+
+void test_lighting_with_surface_in_shadow();
+void test_no_shadow_collinear_point_and_light();
+void test_is_shadowed_with_obstruction();
+void test_is_shadowed_object_behind_light();
+void test_is_shadowed_object_behind_point();
+void test_hit_offset_point();
 
 #endif

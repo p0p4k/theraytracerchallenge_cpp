@@ -1,5 +1,4 @@
 #include "camera.h"
-#include <cmath>
 
 Camera::Camera(int hsize, int vsize, double field_of_view)
     : hsize(hsize), vsize(vsize), field_of_view(field_of_view),

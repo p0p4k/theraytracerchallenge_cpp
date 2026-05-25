@@ -1,11 +1,10 @@
 #include "light_source.h"
-#include "color.h"
 #include "tuple.h"
 #include <cmath>
 
 Color LightSource::lighting(const Material &m, const RayPoint &p,
-                            const RayVector &eyev,
-                            const RayVector &normalv) const {
+                            const RayVector &eyev, const RayVector &normalv,
+                            const bool in_shadow) const {
 
   Color ambient = Color(0, 0, 0);
   Color diffuse = Color(0, 0, 0);
@@ -16,6 +15,10 @@ Color LightSource::lighting(const Material &m, const RayPoint &p,
   RayVector lightv = (this->position - p).normalize();
 
   ambient = effective_color * m.ambient;
+
+  if (in_shadow) {
+    return ambient;
+  }
 
   double light_dot_normal = lightv.dot(normalv);
   if (light_dot_normal < 0.0) {

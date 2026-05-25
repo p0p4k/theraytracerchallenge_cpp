@@ -16,6 +16,7 @@ public:
   RayVector eyev;
   RayVector normalv;
   bool inside;
+  RayPoint over_point = RayPoint(0, 0, 0);
 
   Computations(const Intersection &intersection, const Ray &ray);
 };
@@ -30,8 +31,10 @@ public:
 
   void clear();
   std::vector<Intersection> intersect_world(const Ray &r) const;
-  Color shade_hit(const Computations &comps) const;
+  Color shade_hit(const Computations &comps,
+                  const bool dont_shadow = true) const;
   Color color_at(const Ray &ray) const;
+  bool is_shadowed(const RayPoint &p) const;
 };
 
 class DefaultWorld : public World {

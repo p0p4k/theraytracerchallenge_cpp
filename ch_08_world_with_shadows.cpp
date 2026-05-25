@@ -55,8 +55,8 @@ int main() {
   w.objects.insert(w.objects.end(),
                    {floor, left_wall, right_wall, middle, right, left});
 
-  // Camera camera(1280, 720, PI / 3);
-  Camera camera(100, 100, PI / 3);
+  Camera camera(1280, 720, PI / 3);
+  // Camera camera(100, 100, PI / 3);
   RayPoint from(0, 1.5, -5);
   RayPoint to(0, 1, 0);
   RayVector up(0, 1, 0);
@@ -64,7 +64,7 @@ int main() {
 
   Canvas c = camera.render(w);
 
-  std::ofstream out_file("world_render_sphere_no_shadows.ppm");
+  std::ofstream out_file("world_render_sphere_shadows.ppm");
   if (out_file.is_open()) {
     out_file << c.canvas_to_ppm();
     out_file.close();
