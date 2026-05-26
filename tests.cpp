@@ -1,10 +1,14 @@
 
 #include "tests.h"
 #include "camera.h"
+#include "color.h"
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
+#include "pattern.h"
 #include "plane.h"
+#include "shapes.h"
+#include "sphere.h"
 #include "tuple.h"
 #include "utilities.h"
 #include "world.h"
@@ -1337,20 +1341,23 @@ void test_sphere_may_be_assigned_a_material() {
 }
 
 void test_lighting_with_eye_between_light_and_surface() {
+  TestShape *s = new TestShape();
   Material m;
   RayPoint position(0, 0, 0);
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
 
-  Color result = light.lighting(m, position, eyev, normalv);
+  Color result = light.lighting(m, s, position, eyev, normalv);
 
   assert(equal(result.r, 1.9) && equal(result.g, 1.9) && equal(result.b, 1.9));
   std::cout << "[PASS 6.14] Lighting with eye between light and surface works."
             << std::endl;
+  delete s;
 }
 
 void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees() {
+  TestShape *s = new TestShape();
   Material m;
   RayPoint position(0, 0, 0);
   double val = std::sqrt(2) / 2.0;
@@ -1358,29 +1365,33 @@ void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees() {
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
 
-  Color result = light.lighting(m, position, eyv, normalv);
+  Color result = light.lighting(m, s, position, eyv, normalv);
 
   assert(equal(result.r, 1.0) && equal(result.g, 1.0) && equal(result.b, 1.0));
   std::cout << "[PASS 6.15] Lighting with eye offset 45 degrees works."
             << std::endl;
+  delete s;
 }
 
 void test_lighting_with_eye_opposite_surface_light_offset_45_degrees() {
+  TestShape *s = new TestShape();
   Material m;
   RayPoint position(0, 0, 0);
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 10, -10));
 
-  Color result = light.lighting(m, position, eyev, normalv);
+  Color result = light.lighting(m, s, position, eyev, normalv);
 
   assert(equal(result.r, 0.7364) && equal(result.g, 0.7364) &&
          equal(result.b, 0.7364));
   std::cout << "[PASS 6.16] Lighting with light source offset 45 degrees works."
             << std::endl;
+  delete s;
 }
 
 void test_lighting_with_eye_in_the_path_of_the_reflection_vector() {
+  TestShape *s = new TestShape();
   Material m;
   RayPoint position(0, 0, 0);
   double val = std::sqrt(2) / 2.0;
@@ -1388,29 +1399,32 @@ void test_lighting_with_eye_in_the_path_of_the_reflection_vector() {
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 10, -10));
 
-  Color result = light.lighting(m, position, eyev, normalv);
+  Color result = light.lighting(m, s, position, eyev, normalv);
 
   assert(equal(result.r, 1.6364) && equal(result.g, 1.6364) &&
          equal(result.b, 1.6364));
   std::cout << "[PASS 6.17] Lighting with eye in the direct path of the "
                "reflection vector works."
             << std::endl;
+  delete s;
 }
 
 void test_lighting_with_the_light_behind_the_surface() {
   Material m;
+  TestShape *s = new TestShape();
   RayPoint position(0, 0, 0);
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1),
                     RayPoint(0, 0, 10)); // Light behind the wall
 
-  Color result = light.lighting(m, position, eyev, normalv);
+  Color result = light.lighting(m, s, position, eyev, normalv);
 
   assert(equal(result.r, 0.1) && equal(result.g, 0.1) && equal(result.b, 0.1));
   std::cout << "[PASS 6.18] Lighting with the light source completely behind "
                "the surface works."
             << std::endl;
+  delete s;
 }
 
 void test_world_empty_on_creation() {
@@ -1626,18 +1640,20 @@ void test_rendering_a_world_with_a_camera() {
 }
 
 void test_lighting_with_surface_in_shadow() {
+  Sphere *s = new Sphere();
   RayVector eyev(0, 0, -1);
   RayVector normalv(0, 0, -1);
   LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
   bool in_shadow = true;
   Material m;
   RayPoint position(0, 0, 0);
-  Color result = light.lighting(m, position, eyev, normalv, in_shadow);
+  Color result = light.lighting(m, s, position, eyev, normalv, in_shadow);
 
   assert(result == Color(0.1, 0.1, 0.1));
 
   std::cout << "[PASS 8.1] Lighting with surface in shadow basic works."
             << std::endl;
+  delete s;
 }
 
 void test_no_shadow_collinear_point_and_light() {
@@ -1862,5 +1878,225 @@ void test_a_ray_intersecting_a_plane_from_below() {
 
   std::cout << "[PASS 9.14] A ray intersecting a plane from below hits "
                "correctly works."
+            << std::endl;
+}
+
+void test_create_stripe_pattern() {
+  StripePattern p(COLOR_WHITE, COLOR_BLACK);
+  assert(p.a == COLOR_WHITE);
+  assert(p.b == COLOR_BLACK);
+
+  std::cout << "[PASS 10.1] Stripe pattern creation works." << std::endl;
+}
+
+void test_stripe_pattern_is_constant_in_y() {
+  StripePattern p(COLOR_WHITE, COLOR_BLACK);
+  assert(p.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(p.pattern_at(RayPoint(0, 1, 0)) == COLOR_WHITE);
+  assert(p.pattern_at(RayPoint(0, 2, 0)) == COLOR_WHITE);
+
+  std::cout << "[PASS 10.2] Stripe pattern constant in y works." << std::endl;
+}
+
+void test_stripe_pattern_is_constant_in_z() {
+  StripePattern p(COLOR_WHITE, COLOR_BLACK);
+  assert(p.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(p.pattern_at(RayPoint(0, 0, 1)) == COLOR_WHITE);
+  assert(p.pattern_at(RayPoint(0, 0, 2)) == COLOR_WHITE);
+
+  std::cout << "[PASS 10.3] Stripe pattern constant in z works." << std::endl;
+}
+
+void test_stripe_pattern_alternates_in_x() {
+  StripePattern p(COLOR_WHITE, COLOR_BLACK);
+
+  assert(p.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(p.pattern_at(RayPoint(0.9, 0, 0)) == COLOR_WHITE);
+  assert(p.pattern_at(RayPoint(1, 0, 0)) == COLOR_BLACK);
+  assert(p.pattern_at(RayPoint(-0.1, 0, 0)) == COLOR_BLACK);
+  assert(p.pattern_at(RayPoint(-1, 0, 0)) == COLOR_BLACK);
+  assert(p.pattern_at(RayPoint(-1.1, 0, 0)) == COLOR_WHITE);
+
+  std::cout << "[PASS 10.4] Stripe pattern alternates in x works." << std::endl;
+}
+
+void test_lightning_with_pattern_applied() {
+  Sphere *s = new Sphere();
+  Material m;
+  StripePattern *pattern = new StripePattern(COLOR_WHITE, COLOR_BLACK);
+  m.pattern = pattern;
+  m.ambient = 1.0;
+  m.diffuse = 0.0;
+  m.specular = 0.0;
+  RayVector eyev(0, 0, -1);
+  RayVector normalv(0, 0, -1);
+  LightSource light(Color(1, 1, 1), RayPoint(0, 0, -10));
+  Color c1 = light.lighting(m, s, RayPoint(0.9, 0, 0), eyev, normalv, false);
+  Color c2 = light.lighting(m, s, RayPoint(1.1, 0, 0), eyev, normalv, false);
+
+  assert(c1 == COLOR_WHITE);
+  assert(c2 == COLOR_BLACK);
+
+  std::cout << "[PASS 10.5] Lighting with pattern works." << std::endl;
+  delete s;
+}
+
+void test_stripe_pattern_with_object_transformation() {
+  Sphere *object = new Sphere();
+  object->set_transform(Matrix::scaling(2, 2, 2));
+  StripePattern pattern(COLOR_WHITE, COLOR_BLACK);
+
+  // When an object is scaled up by 2, a world point at X=1.5 is local X=0.75
+  Color c = pattern.pattern_at_object(object, RayPoint(1.5, 0, 0));
+  assert(c == COLOR_WHITE);
+
+  std::cout << "[PASS 10.6] Stripes with object transformation works."
+            << std::endl;
+  delete object;
+}
+
+void test_stripe_pattern_with_pattern_transformation() {
+  Sphere *object = new Sphere();
+  StripePattern pattern(COLOR_WHITE, COLOR_BLACK);
+  pattern.set_transform(Matrix::scaling(2, 2, 2));
+
+  // When pattern is scaled up by 2, world point X=1.5 maps to pattern space
+  // X=0.75
+  Color c = pattern.pattern_at_object(object, RayPoint(1.5, 0, 0));
+  assert(c == COLOR_WHITE);
+
+  std::cout << "[PASS 10.7] Stripes with pattern transformation works."
+            << std::endl;
+  delete object;
+}
+
+void test_stripe_pattern_with_both_transformations() {
+  Sphere *object = new Sphere();
+  object->set_transform(Matrix::scaling(2, 2, 2));
+  StripePattern pattern(COLOR_WHITE, COLOR_BLACK);
+  pattern.set_transform(Matrix::translation(0.5, 0, 0));
+
+  // Combined matrix: pattern_inverse * object_inverse * world_point
+  Color c = pattern.pattern_at_object(object, RayPoint(2.5, 0, 0));
+  assert(c == COLOR_WHITE);
+
+  std::cout << "[PASS 10.8] Stripes with both object and pattern "
+               "transformations works."
+            << std::endl;
+
+  delete object;
+}
+
+void test_default_pattern_transformation() {
+  TestPattern pattern;
+
+  assert(pattern.transform == Matrix::identity(4));
+
+  std::cout << "[PASS 10.9] Default pattern transformation is identity."
+            << std::endl;
+}
+
+void test_assigning_a_transformation() {
+  TestPattern pattern;
+  pattern.set_transform(Matrix::translation(1, 2, 3));
+
+  assert(pattern.transform == Matrix::translation(1, 2, 3));
+
+  std::cout << "[PASS 10.10] Assigning a transformation to a pattern works."
+            << std::endl;
+}
+
+void test_pattern_with_an_object_transformation() {
+  Sphere *object = new Sphere();
+  object->set_transform(Matrix::scaling(2, 2, 2));
+  TestPattern pattern;
+
+  Color c = pattern.pattern_at_object(object, RayPoint(2, 3, 4));
+  assert(c == Color(1, 1.5, 2));
+
+  std::cout << "[PASS 10.11] Base pattern with object transformation works."
+            << std::endl;
+}
+
+void test_pattern_with_a_pattern_transformation() {
+  Sphere *object = new Sphere();
+  TestPattern pattern;
+  pattern.set_transform(Matrix::scaling(2, 2, 2));
+
+  Color c = pattern.pattern_at_object(object, RayPoint(2, 3, 4));
+  assert(c == Color(1, 1.5, 2));
+
+  std::cout << "[PASS 10.12] Base pattern with pattern transformation works."
+            << std::endl;
+}
+
+void test_pattern_with_both_transformations() {
+  Sphere *object = new Sphere();
+  object->set_transform(Matrix::scaling(2, 2, 2));
+  TestPattern pattern;
+  pattern.set_transform(Matrix::translation(0.5, 1, 1.5));
+
+  Color c = pattern.pattern_at_object(object, RayPoint(2.5, 3, 3.5));
+  assert(c == Color(0.75, 0.5, 0.25));
+
+  std::cout << "[PASS 10.13] Base pattern with both object and pattern "
+               "transformations works."
+            << std::endl;
+}
+
+void test_gradient_pattern_interpolates() {
+  GradientPattern pattern(COLOR_WHITE, COLOR_BLACK);
+
+  assert(pattern.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(0.25, 0, 0)) == Color(0.75, 0.75, 0.75));
+  assert(pattern.pattern_at(RayPoint(0.5, 0, 0)) == Color(0.5, 0.5, 0.5));
+  assert(pattern.pattern_at(RayPoint(0.75, 0, 0)) == Color(0.25, 0.25, 0.25));
+
+  std::cout << "[PASS 10.14] Gradient pattern interpolation works."
+            << std::endl;
+}
+
+void test_ring_pattern_alternates_in_both_x_and_z() {
+  RingPattern pattern(COLOR_WHITE, COLOR_BLACK);
+
+  assert(pattern.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(1, 0, 0)) == COLOR_BLACK);
+  assert(pattern.pattern_at(RayPoint(0, 0, 1)) == COLOR_BLACK);
+  assert(pattern.pattern_at(RayPoint(0.708, 0, 0.708)) == COLOR_BLACK);
+
+  std::cout << "[PASS 10.15] Ring pattern concentric checks works."
+            << std::endl;
+}
+
+void test_checkers_pattern_alternates_in_x() {
+  CheckersPattern pattern(COLOR_WHITE, COLOR_BLACK);
+
+  assert(pattern.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(0.99, 0, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(1.01, 0, 0)) == COLOR_BLACK);
+
+  std::cout << "[PASS 10.16] Checkers pattern alternates in X works."
+            << std::endl;
+}
+
+void test_checkers_pattern_alternates_in_y() {
+  CheckersPattern pattern(COLOR_WHITE, COLOR_BLACK);
+
+  assert(pattern.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(0, 0.99, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(0, 1.01, 0)) == COLOR_BLACK);
+
+  std::cout << "[PASS 10.17] Checkers pattern alternates in Y works."
+            << std::endl;
+}
+
+void test_checkers_pattern_alternates_in_z() {
+  CheckersPattern pattern(COLOR_WHITE, COLOR_BLACK);
+
+  assert(pattern.pattern_at(RayPoint(0, 0, 0)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(0, 0, 0.99)) == COLOR_WHITE);
+  assert(pattern.pattern_at(RayPoint(0, 0, 1.01)) == COLOR_BLACK);
+
+  std::cout << "[PASS 10.18] Checkers pattern alternates in Z works."
             << std::endl;
 }

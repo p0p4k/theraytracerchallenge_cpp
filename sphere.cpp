@@ -21,8 +21,8 @@ std::vector<Intersection> Sphere::local_intersects(const Ray &local_ray) const {
   double t1 = (-b - sqrt_discriminant) / two_a;
   double t2 = (-b + sqrt_discriminant) / two_a;
 
-  intersections.push_back(Intersection(t1, this));
-  intersections.push_back(Intersection(t2, this));
+  intersections.push_back(Intersection(t1, const_cast<Sphere *>(this)));
+  intersections.push_back(Intersection(t2, const_cast<Sphere *>(this)));
 
   return intersections;
 }

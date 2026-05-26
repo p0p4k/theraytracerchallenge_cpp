@@ -25,7 +25,7 @@ void World::clear() {
     delete light_source;
     light_source = nullptr;
   }
-  for (const Shape *obj : objects) {
+  for (Shape *obj : objects) {
     delete obj;
   }
   objects.clear();
@@ -33,7 +33,7 @@ void World::clear() {
 
 std::vector<Intersection> World::intersect_world(const Ray &r) const {
   std::vector<Intersection> xs;
-  for (const Shape *o : objects) {
+  for (Shape *o : objects) {
     std::vector<Intersection> obj_xs = o->intersects(r);
     xs.insert(xs.end(), obj_xs.begin(), obj_xs.end());
   }
@@ -53,8 +53,9 @@ Color World::shade_hit(const Computations &comps,
     }
   }
 
-  return light_source->lighting(comps.object->material, comps.point, comps.eyev,
-                                comps.normalv, in_shadow);
+  return light_source->lighting(comps.object->material, comps.object,
+                                comps.over_point, comps.eyev, comps.normalv,
+                                in_shadow);
 }
 
 Color World::color_at(const Ray &ray) const {

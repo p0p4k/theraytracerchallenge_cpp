@@ -9,8 +9,8 @@ class Intersection {
 public:
   double t;
   int id;
-  const Shape *object;
-  Intersection(double t, const Shape *object) : t(t), object(object) {}
+  Shape *object;
+  Intersection(double t, Shape *object) : t(t), object(object) {}
 
   bool operator<(const Intersection &other) const { return t < other.t; }
 };

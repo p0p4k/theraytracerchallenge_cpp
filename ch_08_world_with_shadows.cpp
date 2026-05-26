@@ -1,6 +1,5 @@
 #include "camera.h"
 #include "canvas.h"
-#include "intersection.h"
 #include "light_source.h"
 #include "sphere.h"
 #include "tuple.h"

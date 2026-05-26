@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "canvas.h"
 #include "light_source.h"
+#include "pattern.h"
 #include "plane.h"
 #include "sphere.h"
 #include "tuple.h"
@@ -45,11 +46,13 @@ int main() {
   middle->material.color = Color(0.1, 1.0, 0.5);
   middle->material.diffuse = 0.7;
   middle->material.specular = 0.3;
+  StripePattern *pattern = new StripePattern(Color(1, 0, 0), Color(0, 0, 1));
+  middle->material.pattern = pattern;
 
   // 5. Right Sphere
   Sphere *right = new Sphere();
   right->set_transform(Matrix::chain_transforms(
-      {Matrix::translation(1.5, 0.5, -0.5), Matrix::scaling(0.5, 0.5, 0.5)}));
+      {Matrix::translation(1.5, 0.5, -0.5), Matrix::scaling(1.5, 0.5, 0.5)}));
   right->material.color = Color(0.5, 1.0, 0.1);
   right->material.diffuse = 0.7;
   right->material.specular = 0.3;
@@ -68,7 +71,7 @@ int main() {
                    {floor, left_wall, right_wall, middle, right, left});
 
   // Camera Setup
-  Camera camera(100, 100, M_PI / 3.0);
+  Camera camera(1280, 720, M_PI / 3.0);
   RayPoint from(0, 1.5, -5);
   RayPoint to(0, 1, 0);
   RayVector up(0, 1, 0);

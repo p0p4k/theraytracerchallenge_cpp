@@ -14,7 +14,6 @@
 #include <iostream>
 #include <ostream>
 #include <sstream>
-
 #include <cassert>
 
 void test_tuple_to_point();
@@ -30,7 +29,6 @@ void test_magnitude_of_vector();
 void test_normalize_vector();
 void test_dot_product_vector();
 void test_cross_product_vector();
-
 void test_color_implementation();
 void test_color_addition();
 void test_color_subtraction();
@@ -39,7 +37,6 @@ void test_color_multiply_by_color();
 void test_create_canvas();
 void test_writing_canvas();
 void test_canvas_to_ppm_header();
-
 void test_matrix_construction();
 void test_matrix_comparision_equal();
 void test_matrix_comparision_not_equal();
@@ -53,16 +50,14 @@ void test_matrix_minor_3x3();
 void test_matrix_cofactor();
 void test_matrix_determinant_large();
 void test_matrix_inversion();
-
 void test_matrix_translation();
 void test_matrix_scaling();
 void test_matrix_rotation_x();
+void test_matrix_rotation_x_inverse();
 void test_matrix_rotation_y();
 void test_matrix_rotation_z();
-void test_matrix_rotation_x_inverse();
 void test_matrix_shearing();
 void test_individual_and_chained_transformations();
-
 void test_create_and_query_ray();
 void test_ray_point_from_dist();
 void test_sphere_ray_intersect_at_two_points();
@@ -79,7 +74,6 @@ void test_sphere_default_transformation();
 void test_sphere_transformation();
 void test_intersect_scaled_sphere_with_ray();
 void test_intersect_translated_sphere_with_ray();
-
 void test_normal_on_sphere_at_point_on_x_axis();
 void test_normal_on_sphere_at_point_on_y_axis();
 void test_normal_on_sphere_at_point_on_z_axis();
@@ -98,10 +92,11 @@ void test_lighting_with_eye_between_light_and_surface_eye_offset_45_degrees();
 void test_lighting_with_eye_opposite_surface_light_offset_45_degrees();
 void test_lighting_with_eye_in_the_path_of_the_reflection_vector();
 void test_lighting_with_the_light_behind_the_surface();
-
 void test_world_empty_on_creation();
 void test_default_world();
 void test_intersect_world_with_ray();
+void test_precomputing_state_of_intersection();
+void test_precomputing_state_of_intersection_inside();
 void test_shading_an_intersection();
 void test_shading_an_intersection_from_the_inside();
 void test_color_at_ray_misses();
@@ -116,14 +111,12 @@ void test_ray_through_center_of_canvas();
 void test_ray_through_corner_of_canvas();
 void test_ray_with_transformed_camera();
 void test_rendering_a_world_with_a_camera();
-
 void test_lighting_with_surface_in_shadow();
 void test_no_shadow_collinear_point_and_light();
 void test_is_shadowed_with_obstruction();
 void test_is_shadowed_object_behind_light();
 void test_is_shadowed_object_behind_point();
 void test_hit_offset_point();
-
 void test_default_shape_transformation();
 void test_assigning_a_transformation_on_base_shape();
 void test_default_shape_has_default_material();
@@ -131,7 +124,6 @@ void test_assigning_a_material_to_a_shape();
 void test_shape_intersection_encapsulates_material();
 void test_intersecting_a_scaled_shape_with_a_ray();
 void test_intersecting_a_translated_shape_with_a_ray();
-
 void test_computing_the_normal_on_a_translated_shape();
 void test_computing_the_normal_on_a_transformed_shape();
 void test_the_normal_of_a_plane_is_constant_everywhere();
@@ -139,5 +131,23 @@ void test_intersect_with_a_ray_parallel_to_the_plane();
 void test_intersect_with_a_coplanar_ray();
 void test_a_ray_intersecting_a_plane_from_above();
 void test_a_ray_intersecting_a_plane_from_below();
+void test_create_stripe_pattern();
+void test_stripe_pattern_is_constant_in_y();
+void test_stripe_pattern_is_constant_in_z();
+void test_stripe_pattern_alternates_in_x();
+void test_lightning_with_pattern_applied();
+void test_stripe_pattern_with_object_transformation();
+void test_stripe_pattern_with_pattern_transformation();
+void test_stripe_pattern_with_both_transformations();
+void test_default_pattern_transformation();
+void test_assigning_a_transformation();
+void test_pattern_with_an_object_transformation();
+void test_pattern_with_a_pattern_transformation();
+void test_pattern_with_both_transformations();
+void test_gradient_pattern_interpolates();
+void test_ring_pattern_alternates_in_both_x_and_z();
+void test_checkers_pattern_alternates_in_x();
+void test_checkers_pattern_alternates_in_y();
+void test_checkers_pattern_alternates_in_z();
 
 #endif

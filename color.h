@@ -1,7 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "tuple.h"
 #include "utilities.h"
+;
 
 struct Color {
   double r, g, b;
@@ -26,5 +28,8 @@ struct Color {
     return Color(r * other.r, g * other.g, b * other.b);
   }
 };
+
+const Color COLOR_BLACK = Color(0, 0, 0);
+const Color COLOR_WHITE = Color(1, 1, 1);
 
 #endif

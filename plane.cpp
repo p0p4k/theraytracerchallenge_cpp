@@ -15,7 +15,7 @@ std::vector<Intersection> Plane::local_intersects(const Ray &local_ray) const {
     return intersections;
   } else {
     double t = -local_ray.origin.y / local_ray.direction.y;
-    intersections.push_back(Intersection(t, this));
+    intersections.push_back(Intersection(t, const_cast<Plane *>(this)));
     return intersections;
   }
 }

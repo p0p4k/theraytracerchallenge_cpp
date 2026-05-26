@@ -12,8 +12,9 @@ public:
   LightSource(Color i = Color(0, 0, 0), RayPoint p = RayPoint(0, 0, 0))
       : intensity(i), position(p) {};
 
-  Color lighting(const Material &m, const RayPoint &p, const RayVector &eyev,
-                 const RayVector &normalv, const bool in_shadow = false) const;
+  Color lighting(const Material &m, Shape *object, const RayPoint &p,
+                 const RayVector &eyev, const RayVector &normalv,
+                 const bool in_shadow = false) const;
 
   bool operator==(const LightSource &other) const;
 };

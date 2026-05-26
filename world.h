@@ -12,7 +12,7 @@
 class Computations {
 public:
   double t;
-  const Shape *object;
+  Shape *object;
   RayPoint point;
   RayVector eyev;
   RayVector normalv;
@@ -24,7 +24,7 @@ public:
 
 class World {
 public:
-  std::vector<const Shape *> objects;
+  std::vector<Shape *> objects;
   LightSource *light_source;
 
   World();

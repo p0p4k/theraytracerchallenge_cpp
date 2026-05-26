@@ -2,15 +2,20 @@
 #include "tuple.h"
 #include <cmath>
 
-Color LightSource::lighting(const Material &m, const RayPoint &p,
+Color LightSource::lighting(const Material &m, Shape *object, const RayPoint &p,
                             const RayVector &eyev, const RayVector &normalv,
                             const bool in_shadow) const {
+  Color color = m.color;
+  if (m.pattern) {
+    // color = m.pattern->pattern_at(p);
+    color = m.pattern->pattern_at_object(object, p);
+  }
 
   Color ambient = Color(0, 0, 0);
   Color diffuse = Color(0, 0, 0);
   Color specular = Color(0, 0, 0);
 
-  Color effective_color = m.color * this->intensity;
+  Color effective_color = color * this->intensity;
 
   RayVector lightv = (this->position - p).normalize();
 
