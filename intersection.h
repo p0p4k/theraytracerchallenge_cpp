@@ -3,14 +3,14 @@
 
 #include <vector>
 
-class Sphere;
+class Shape;
 
 class Intersection {
 public:
   double t;
   int id;
-  const Sphere *object;
-  Intersection(double t, const Sphere *object) : t(t), object(object) {}
+  const Shape *object;
+  Intersection(double t, const Shape *object) : t(t), object(object) {}
 
   bool operator<(const Intersection &other) const { return t < other.t; }
 };

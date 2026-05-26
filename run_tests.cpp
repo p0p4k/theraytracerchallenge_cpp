@@ -108,4 +108,19 @@ void run_tests() {
   test_is_shadowed_object_behind_light();
   test_is_shadowed_object_behind_point();
   test_hit_offset_point();
+
+  test_default_shape_transformation();
+  test_assigning_a_transformation_on_base_shape();
+  test_default_shape_has_default_material();
+  test_assigning_a_material_to_a_shape();
+  test_shape_intersection_encapsulates_material();
+  test_intersecting_a_scaled_shape_with_a_ray();
+  test_intersecting_a_translated_shape_with_a_ray();
+  test_computing_the_normal_on_a_translated_shape();
+  test_computing_the_normal_on_a_transformed_shape();
+  test_the_normal_of_a_plane_is_constant_everywhere();
+  test_intersect_with_a_ray_parallel_to_the_plane();
+  test_intersect_with_a_coplanar_ray();
+  test_a_ray_intersecting_a_plane_from_above();
+  test_a_ray_intersecting_a_plane_from_below();
 }

@@ -4,6 +4,7 @@
 #include "color.h"
 #include "intersection.h"
 #include "light_source.h"
+#include "shapes.h"
 #include "sphere.h"
 #include "tuple.h"
 #include <vector>
@@ -11,7 +12,7 @@
 class Computations {
 public:
   double t;
-  const Sphere *object;
+  const Shape *object;
   RayPoint point;
   RayVector eyev;
   RayVector normalv;
@@ -23,7 +24,7 @@ public:
 
 class World {
 public:
-  std::vector<const Sphere *> objects;
+  std::vector<const Shape *> objects;
   LightSource *light_source;
 
   World();

@@ -25,7 +25,7 @@ void World::clear() {
     delete light_source;
     light_source = nullptr;
   }
-  for (const Sphere *obj : objects) {
+  for (const Shape *obj : objects) {
     delete obj;
   }
   objects.clear();
@@ -33,7 +33,7 @@ void World::clear() {
 
 std::vector<Intersection> World::intersect_world(const Ray &r) const {
   std::vector<Intersection> xs;
-  for (const Sphere *o : objects) {
+  for (const Shape *o : objects) {
     std::vector<Intersection> obj_xs = o->intersects(r);
     xs.insert(xs.end(), obj_xs.begin(), obj_xs.end());
   }

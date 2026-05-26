@@ -4,6 +4,7 @@
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
+#include "plane.h"
 #include "tuple.h"
 #include "utilities.h"
 #include "world.h"
@@ -1524,8 +1525,8 @@ void test_color_at_ray_hits() {
 void test_color_with_intersection_behind_the_ray() {
   DefaultWorld w;
 
-  const_cast<Sphere *>(w.objects[0])->material.ambient = 1.0;
-  const_cast<Sphere *>(w.objects[1])->material.ambient = 1.0;
+  const_cast<Shape *>(w.objects[0])->material.ambient = 1.0;
+  const_cast<Shape *>(w.objects[1])->material.ambient = 1.0;
 
   Ray r(RayPoint(0, 0, 0.75), RayVector(0, 0, -1));
   Color c = w.color_at(r);
@@ -1683,4 +1684,183 @@ void test_hit_offset_point() {
   assert(comps.point.z > comps.over_point.z);
 
   std::cout << "[PASS 8.6] Hit offsets the point works." << std::endl;
+}
+
+void test_default_shape_transformation() {
+  TestShape s;
+
+  assert(s.transform == Matrix::identity(4));
+  std::cout << "[PASS 9.1] Default shape transformation is identity works."
+            << std::endl;
+}
+
+void test_assigning_a_transformation_on_base_shape() {
+  TestShape s;
+  s.set_transform(Matrix::translation(2, 3, 4));
+
+  assert(s.transform == Matrix::translation(2, 3, 4));
+  std::cout << "[PASS 9.2] Shape transformation assignment works." << std::endl;
+}
+
+void test_default_shape_has_default_material() {
+  TestShape s;
+
+  assert(s.material.ambient == 0.1);
+  assert(s.material.diffuse == 0.9);
+  assert(s.material.specular == 0.9);
+  assert(s.material.shininess == 200.0);
+  assert(s.material.color == Color(1, 1, 1));
+
+  std::cout << "[PASS 9.3] Default shape has a default material." << std::endl;
+}
+
+void test_assigning_a_material_to_a_shape() {
+  TestShape s;
+  Material m;
+  m.ambient = 1.0;
+
+  s.material = m;
+
+  assert(s.material.ambient == 1.0);
+  std::cout << "[PASS 9.4] Assigning a material to a shape works." << std::endl;
+}
+
+void test_shape_intersection_encapsulates_material() {
+  TestShape s;
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+
+  Intersection i(3.5, &s);
+
+  assert(i.object->material.ambient == 0.1);
+  assert(i.object == &s);
+
+  std::cout << "[PASS 9.5] Intersection points to the correct shape material "
+               "context works."
+            << std::endl;
+}
+
+void test_intersecting_a_scaled_shape_with_a_ray() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  TestShape s;
+
+  s.set_transform(Matrix::scaling(2.0, 2.0, 2.0));
+
+  s.intersects(r);
+
+  assert(s.saved_ray.origin == RayPoint(0, 0, -2.5));
+  assert(s.saved_ray.direction == RayVector(0, 0, 0.5));
+
+  std::cout << "[PASS 9.6] Intersecting a scaled shape transforms the ray "
+               "works."
+            << std::endl;
+}
+
+void test_intersecting_a_translated_shape_with_a_ray() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  TestShape s;
+
+  s.set_transform(Matrix::translation(0, 0, 5));
+
+  s.intersects(r);
+
+  assert(s.saved_ray.origin == RayPoint(0, 0, -10));
+  assert(s.saved_ray.direction == RayVector(0, 0, 1));
+
+  std::cout << "[PASS 9.7] Intersecting a translated shape transforms the ray "
+               "works."
+            << std::endl;
+}
+
+void test_computing_the_normal_on_a_translated_shape() {
+  TestShape s;
+  s.set_transform(Matrix::translation(0, 1, 0));
+
+  RayVector n = s.normal_at(RayPoint(0, 1.70711, -0.70711));
+
+  assert(equal(n.x, 0.0) && equal(n.y, 0.70711) && equal(n.z, -0.70711));
+  std::cout << "[PASS 9.8] Computing the normal on a translated shape works."
+            << std::endl;
+}
+
+void test_computing_the_normal_on_a_transformed_shape() {
+  TestShape s;
+
+  Matrix m = Matrix::chain_transforms(
+      {Matrix::scaling(1, 0.5, 1), Matrix::rotation_z(PI / 5.0)});
+  s.set_transform(m);
+
+  double sqrt_2_over_2 = std::sqrt(2.0) / 2.0;
+  RayVector n = s.normal_at(RayPoint(0, sqrt_2_over_2, -sqrt_2_over_2));
+
+  assert(equal(n.x, 0.0) && equal(n.y, 0.97014) && equal(n.z, -0.24254));
+  std::cout << "[PASS 9.9] Computing the normal on a transformed shape works."
+            << std::endl;
+}
+
+void test_the_normal_of_a_plane_is_constant_everywhere() {
+  Plane p;
+
+  RayVector n1 = p.local_normal_at(RayPoint(0, 0, 0));
+  RayVector n2 = p.local_normal_at(RayPoint(10, 0, -5));
+  RayVector n3 = p.local_normal_at(RayPoint(-5, 0, 150));
+
+  assert(n1 == RayVector(0, 1, 0));
+  assert(n2 == RayVector(0, 1, 0));
+  assert(n3 == RayVector(0, 1, 0));
+
+  std::cout << "[PASS 9.10] The normal of a plane is constant everywhere works."
+            << std::endl;
+}
+
+void test_intersect_with_a_ray_parallel_to_the_plane() {
+  Plane p;
+  Ray r(RayPoint(0, 1, 0), RayVector(0, 0, 1));
+
+  std::vector<Intersection> xs = p.local_intersects(r);
+
+  assert(xs.empty());
+  std::cout << "[PASS 9.11] Intersecting a ray parallel to the plane returns "
+               "no hits works."
+            << std::endl;
+}
+
+void test_intersect_with_a_coplanar_ray() {
+  Plane p;
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 0, 1));
+
+  std::vector<Intersection> xs = p.local_intersects(r);
+
+  assert(xs.empty());
+  std::cout << "[PASS 9.12] Intersecting a coplanar ray returns no hits works."
+            << std::endl;
+}
+
+void test_a_ray_intersecting_a_plane_from_above() {
+  Plane p;
+  Ray r(RayPoint(0, 1, 0), RayVector(0, -1, 0));
+
+  std::vector<Intersection> xs = p.local_intersects(r);
+
+  assert(xs.size() == 1);
+  assert(equal(xs[0].t, 1.0));
+  assert(xs[0].object == &p);
+
+  std::cout << "[PASS 9.13] A ray intersecting a plane from above hits "
+               "correctly works."
+            << std::endl;
+}
+
+void test_a_ray_intersecting_a_plane_from_below() {
+  Plane p;
+  Ray r(RayPoint(0, -1, 0), RayVector(0, 1, 0));
+
+  std::vector<Intersection> xs = p.local_intersects(r);
+
+  assert(xs.size() == 1);
+  assert(equal(xs[0].t, 1.0));
+  assert(xs[0].object == &p);
+
+  std::cout << "[PASS 9.14] A ray intersecting a plane from below hits "
+               "correctly works."
+            << std::endl;
 }

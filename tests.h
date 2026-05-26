@@ -124,4 +124,20 @@ void test_is_shadowed_object_behind_light();
 void test_is_shadowed_object_behind_point();
 void test_hit_offset_point();
 
+void test_default_shape_transformation();
+void test_assigning_a_transformation_on_base_shape();
+void test_default_shape_has_default_material();
+void test_assigning_a_material_to_a_shape();
+void test_shape_intersection_encapsulates_material();
+void test_intersecting_a_scaled_shape_with_a_ray();
+void test_intersecting_a_translated_shape_with_a_ray();
+
+void test_computing_the_normal_on_a_translated_shape();
+void test_computing_the_normal_on_a_transformed_shape();
+void test_the_normal_of_a_plane_is_constant_everywhere();
+void test_intersect_with_a_ray_parallel_to_the_plane();
+void test_intersect_with_a_coplanar_ray();
+void test_a_ray_intersecting_a_plane_from_above();
+void test_a_ray_intersecting_a_plane_from_below();
+
 #endif
