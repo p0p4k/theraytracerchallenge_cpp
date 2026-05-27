@@ -2,16 +2,19 @@
 #include "tests.h"
 #include "camera.h"
 #include "color.h"
+#include "computations.h"
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
 #include "pattern.h"
 #include "plane.h"
+#include "ray.h"
 #include "shapes.h"
 #include "sphere.h"
 #include "tuple.h"
 #include "utilities.h"
 #include "world.h"
+#include <cassert>
 #include <vector>
 
 void test_tuple_to_point() {
@@ -2098,5 +2101,366 @@ void test_checkers_pattern_alternates_in_z() {
   assert(pattern.pattern_at(RayPoint(0, 0, 1.01)) == COLOR_BLACK);
 
   std::cout << "[PASS 10.18] Checkers pattern alternates in Z works."
+            << std::endl;
+}
+
+void test_reflectivity_for_default_material() {
+  Material m;
+  assert(equal(m.reflective, 0.0));
+
+  std::cout << "[PASS 11.1] Material is 0.0 reflectivity by default works."
+            << std::endl;
+}
+
+void test_precomupting_reflection_vector() {
+  Plane *shape = new Plane();
+  double sqrt_two_by_two = std::sqrt(2) / 2.0;
+  Ray r(RayPoint(0, 1, -1), RayVector(0, -sqrt_two_by_two, sqrt_two_by_two));
+  Intersection i(std::sqrt(2), shape);
+  Computations comps = Computations(i, r);
+  assert(comps.reflectv == RayVector(0, sqrt_two_by_two, sqrt_two_by_two));
+
+  std::cout << "[PASS 11.2] Precomputing reflection vector works." << std::endl;
+
+  delete shape;
+}
+
+void test_reflected_color_for_nonreflective_material() {
+  DefaultWorld w;
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 0, 1));
+  Shape *shape = w.objects[1];
+  shape->material.ambient = 1.0;
+  Intersection i(1, shape);
+  Computations comps = Computations(i, r);
+  Color color = w.reflected_color(comps);
+  assert(color == COLOR_BLACK);
+
+  std::cout
+      << "[PASS 11.3] Refected color is black for nonreflective material works."
+      << std::endl;
+}
+
+void test_reflected_color_for_reflective_material() {
+  DefaultWorld w;
+  Material m;
+  m.reflective = 0.5;
+  Plane *plane = new Plane(m);
+  plane->set_transform(Matrix::translation(0, -1, 0));
+  w.objects.push_back(plane);
+  double sqrt_two_by_two = std::sqrt(2) / 2.0;
+  Ray r(RayPoint(0, 0, -3), RayVector(0, -sqrt_two_by_two, sqrt_two_by_two));
+  Intersection i(std::sqrt(2.0), plane);
+  Computations comps = Computations(i, r);
+  Color color = w.reflected_color(comps);
+
+  assert(equal(color.r, 0.19032));
+  assert(equal(color.g, 0.2379));
+  assert(equal(color.b, 0.14274));
+  std::cout << "[PASS 11.4] Refected color for reflective material works."
+            << std::endl;
+}
+
+void test_shade_hit_with_reflective_material() {
+  DefaultWorld w;
+  Material m;
+  m.reflective = 0.5;
+
+  Plane *plane = new Plane(m);
+  plane->set_transform(Matrix::translation(0, -1, 0));
+  w.objects.push_back(plane);
+
+  double sqrt_two_by_two = std::sqrt(2) / 2.0;
+  Ray r(RayPoint(0, 0, -3), RayVector(0, -sqrt_two_by_two, sqrt_two_by_two));
+
+  Intersection i(std::sqrt(2.0), plane);
+  Computations comps = Computations(i, r);
+
+  Color color = w.shade_hit(comps);
+
+  assert(equal(color.r, 0.87677));
+  assert(equal(color.g, 0.92436));
+  assert(equal(color.b, 0.82918));
+
+  std::cout << "[PASS 11.5] shade_hit() with a reflective material works."
+            << std::endl;
+}
+
+void test_reflected_color_prevents_infinite_recursion() {
+  World w;
+  w.light_source = new LightSource(Color(1, 1, 1), RayPoint(0, 0, 0));
+
+  Material reflecting_material;
+  reflecting_material.reflective = 1.0;
+
+  Plane *lower = new Plane(reflecting_material);
+  lower->set_transform(Matrix::translation(0, -1, 0));
+  w.objects.push_back(lower);
+
+  Plane *upper = new Plane(reflecting_material);
+  upper->set_transform(Matrix::translation(0, 1, 0));
+  w.objects.push_back(upper);
+
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 1, 0));
+
+  Intersection i(1.0, upper);
+  Computations comps = Computations(i, r);
+
+  Color color = w.reflected_color(comps, 0);
+
+  assert(color == COLOR_BLACK);
+
+  std::cout << "[PASS 11.6] reflected_color() terminates at recursion limit."
+            << std::endl;
+}
+
+void test_transparency_and_refractive_index_for_default_material() {
+  Material m;
+  assert(m.transparency == 0.0);
+  assert(m.refractive_index == 1.0);
+
+  std::cout << "[PASS 11.7] Transparency and refractive index for default "
+               "material works."
+            << std::endl;
+}
+
+void test_glass_sphere_init() {
+  Sphere *s = Sphere::glass_sphere();
+
+  assert(s->transform == Matrix::identity(4));
+  assert(s->material.transparency == 1.0);
+  assert(s->material.refractive_index == 1.5);
+
+  std::cout << "[PASS 11.8] Glass sphere init works." << std::endl;
+
+  delete s;
+}
+
+void test_finding_n1_and_n2_at_various_intersections() {
+  Sphere *A = Sphere::glass_sphere();
+  A->set_transform(Matrix::scaling(2, 2, 2));
+  A->material.refractive_index = 1.5;
+
+  Sphere *B = Sphere::glass_sphere();
+  B->set_transform(Matrix::translation(0, 0, -0.25));
+  B->material.refractive_index = 2.0;
+
+  Sphere *C = Sphere::glass_sphere();
+  C->set_transform(Matrix::translation(0, 0, 0.25));
+  C->material.refractive_index = 2.5;
+
+  Ray r(RayPoint(0, 0, -4), RayVector(0, 0, 1));
+
+  std::vector<Intersection> xs = {Intersection(2.0, A),  Intersection(2.75, B),
+                                  Intersection(3.25, C), Intersection(4.75, B),
+                                  Intersection(5.25, C), Intersection(6.0, A)};
+
+  double expected_n1[6] = {1.0, 1.5, 2.0, 2.5, 2.5, 1.5};
+  double expected_n2[6] = {1.5, 2.0, 2.5, 2.5, 1.5, 1.0};
+
+  for (size_t idx = 0; idx < xs.size(); ++idx) {
+    Computations comps(xs[idx], r, xs);
+
+    assert(equal(comps.n1, expected_n1[idx]));
+    assert(equal(comps.n2, expected_n2[idx]));
+  }
+
+  std::cout << "[PASS 11.9] Finding entry (n1) and exit (n2) index layers "
+               "works perfectly."
+            << std::endl;
+
+  delete A;
+  delete B;
+  delete C;
+}
+
+void test_under_point_offset_precomputation() {
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  Sphere *shape = Sphere::glass_sphere();
+  shape->set_transform(Matrix::translation(0, 0, 1));
+
+  Intersection i(5.0, shape);
+  std::vector<Intersection> xs = {i};
+  Computations comps(i, r, xs);
+
+  assert(comps.under_point.z > EPSILON / 2.0); // EPSILON check
+  assert(comps.point.z < comps.under_point.z);
+
+  std::cout << "[PASS 11.10] Precomputing under_point boundary shift works."
+            << std::endl;
+  delete shape;
+}
+
+void test_refracted_color_of_opaque_surface_is_black() {
+  DefaultWorld w;
+  Shape *shape = w.objects[0];
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+
+  Intersection i1(4.0, shape);
+  Intersection i2(6.0, shape);
+  std::vector<Intersection> xs = {i1, i2};
+
+  Computations comps(xs[0], r, xs);
+  Color c = w.refracted_color(comps, 5);
+
+  assert(c == COLOR_BLACK);
+  std::cout
+      << "[PASS 11.11] Refracted color for completely opaque material is black."
+      << std::endl;
+}
+
+void test_refracted_color_under_total_internal_reflection() {
+  DefaultWorld w;
+  Shape *shape = w.objects[0];
+  shape->material.transparency = 1.0;
+  shape->material.refractive_index = 1.5;
+
+  Ray r(RayPoint(0, 0, std::sqrt(2) / 2.0), RayVector(0, 1, 0));
+
+  std::vector<Intersection> xs = {Intersection(-std::sqrt(2) / 2.0, shape),
+                                  Intersection(std::sqrt(2) / 2.0, shape)};
+
+  Computations comps(xs[1], r, xs);
+  Color c = w.refracted_color(comps, 5);
+
+  assert(c == COLOR_BLACK);
+  std::cout << "[PASS 11.12] Refracted color under total internal reflection "
+               "is black."
+            << std::endl;
+}
+
+void test_refracted_color_with_a_refracted_ray() {
+  DefaultWorld w;
+
+  Shape *A = w.objects[0];
+  A->material.ambient = 1.0;
+  A->material.pattern = new TestPattern();
+
+  Shape *B = w.objects[1];
+  B->material.transparency = 1.0;
+  B->material.refractive_index = 1.5;
+
+  Ray r(RayPoint(0, 0, 0.1), RayVector(0, 1, 0));
+  std::vector<Intersection> xs = {
+      Intersection(-0.9899, A), Intersection(-0.4899, B),
+      Intersection(0.4899, B), Intersection(0.9899, A)};
+
+  Computations comps(xs[2], r, xs);
+  Color c = w.refracted_color(comps, 5);
+
+  assert(equal(c.r, 0.0));
+  assert(equal(c.g, 0.99888));
+  assert(equal(c.b, 0.04725));
+
+  std::cout << "[PASS 11.13] Refracted color with a refracted ray calculates "
+               "correctly."
+            << std::endl;
+}
+
+void test_shade_hit_with_a_transparent_material() {
+  DefaultWorld w;
+
+  Plane *floor = new Plane();
+  floor->set_transform(Matrix::translation(0, -1, 0));
+  floor->material.transparency = 0.5;
+  floor->material.refractive_index = 1.5;
+  w.objects.push_back(floor);
+
+  Sphere *ball = new Sphere();
+  ball->set_transform(Matrix::translation(0, -3.5, -0.5));
+  ball->material.color = Color(1, 0, 0);
+  ball->material.ambient = 0.5;
+  w.objects.push_back(ball);
+
+  double sqrt_two_by_two = std::sqrt(2) / 2.0;
+  Ray r(RayPoint(0, 0, -3), RayVector(0, -sqrt_two_by_two, sqrt_two_by_two));
+  std::vector<Intersection> xs = {Intersection(std::sqrt(2), floor)};
+
+  Computations comps(xs[0], r, xs);
+  Color c = w.shade_hit(comps);
+
+  assert(equal(c.r, 0.93642));
+  assert(equal(c.g, 0.68642));
+  assert(equal(c.b, 0.68642));
+
+  std::cout << "[PASS 11.14] shade_hit() handles transparent surfaces properly."
+            << std::endl;
+}
+
+void test_schlick_approximation_under_total_internal_reflection() {
+  Sphere *shape = Sphere::glass_sphere();
+  Ray r(RayPoint(0, 0, std::sqrt(2) / 2.0), RayVector(0, 1, 0));
+  std::vector<Intersection> xs = {Intersection(-std::sqrt(2) / 2.0, shape),
+                                  Intersection(std::sqrt(2) / 2.0, shape)};
+
+  Computations comps(xs[1], r, xs);
+  double reflectance = schlick(comps);
+
+  assert(equal(reflectance, 1.0));
+
+  std::cout << "[PASS 11.15] Schlick approximation under TIR is 1.0."
+            << std::endl;
+  delete shape;
+}
+
+void test_schlick_approximation_with_a_perpendicular_viewing_angle() {
+  Sphere *shape = Sphere::glass_sphere();
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 1, 0));
+  std::vector<Intersection> xs = {Intersection(-1.0, shape),
+                                  Intersection(1.0, shape)};
+
+  Computations comps(xs[0], r, xs);
+  double reflectance = schlick(comps);
+
+  assert(equal(reflectance, 0.04));
+
+  std::cout << "[PASS 11.16] Schlick approximation perpendicular angle is 0.04."
+            << std::endl;
+  delete shape;
+}
+
+void test_schlick_approximation_with_a_grazing_angle() {
+  Sphere *shape = Sphere::glass_sphere();
+  Ray r(RayPoint(0, 0.99, -2), RayVector(0, 0, 1));
+  std::vector<Intersection> xs = {Intersection(1.8589, shape)};
+
+  Computations comps(xs[0], r, xs);
+  double reflectance = schlick(comps);
+
+  assert(equal(reflectance, 0.48873));
+
+  std::cout << "[PASS 11.17] Schlick approximation grazing angle works."
+            << std::endl;
+  delete shape;
+}
+
+void test_shade_hit_with_a_reflective_transparent_material() {
+  DefaultWorld w;
+
+  Plane *floor = new Plane();
+  floor->set_transform(Matrix::translation(0, -1, 0));
+  floor->material.reflective = 0.5;
+  floor->material.transparency = 0.5;
+  floor->material.refractive_index = 1.5;
+  w.objects.push_back(floor);
+
+  Sphere *ball = new Sphere();
+  ball->set_transform(Matrix::translation(0, -3.5, -0.5));
+  ball->material.color = Color(1, 0, 0);
+  ball->material.ambient = 0.5;
+  w.objects.push_back(ball);
+
+  double sqrt_two_by_two = std::sqrt(2) / 2.0;
+  Ray r(RayPoint(0, 0, -3), RayVector(0, -sqrt_two_by_two, sqrt_two_by_two));
+  std::vector<Intersection> xs = {Intersection(std::sqrt(2), floor)};
+
+  Computations comps(xs[0], r, xs);
+  Color c = w.shade_hit(comps);
+
+  assert(equal(c.r, 0.93391));
+  assert(equal(c.g, 0.69643));
+  assert(equal(c.b, 0.69243));
+
+  std::cout << "[PASS 11.18] shade_hit() with Schlick Fresnel integration "
+               "works."
             << std::endl;
 }

@@ -1,13 +1,9 @@
 #include "shapes.h"
 
-int Shape::next_id = 0;
-
 Shape::Shape(const Material &material)
     : material(material), transform(Matrix::identity(4)),
       inverse_transform(Matrix::identity(4)),
-      inverse_transform_transpose(Matrix::identity(4)) {
-  id = next_id++;
-}
+      inverse_transform_transpose(Matrix::identity(4)) {}
 
 void Shape::set_transform(const Matrix &transformation) {
   transform = transformation;

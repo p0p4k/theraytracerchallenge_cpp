@@ -27,6 +27,10 @@ struct Color {
   Color operator*(const Color &other) const {
     return Color(r * other.r, g * other.g, b * other.b);
   }
+
+  void print_color() const {
+    std::cout << "r: " << r << " g: " << g << " b: " << b << std::endl;
+  }
 };
 
 const Color COLOR_BLACK = Color(0, 0, 0);

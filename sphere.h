@@ -14,6 +14,13 @@ public:
   std::vector<Intersection>
   local_intersects(const Ray &local_ray) const override;
   RayVector local_normal_at(const RayPoint &p) const override;
+
+  static Sphere *glass_sphere() {
+    Sphere *s = new Sphere();
+    s->material.transparency = 1.0;
+    s->material.refractive_index = 1.5;
+    return s;
+  }
 };
 
 #endif

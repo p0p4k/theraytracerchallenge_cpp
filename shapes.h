@@ -10,12 +10,11 @@
 
 class Shape {
 public:
-  int id;
-
   Material material;
   Matrix transform;
   Matrix inverse_transform;
   Matrix inverse_transform_transpose;
+  bool casts_shadow = true;
 
   Shape(const Material &material = Material());
 
@@ -24,9 +23,6 @@ public:
   void set_transform(const Matrix &transformation);
   std::vector<Intersection> intersects(const Ray &world_ray) const;
   RayVector normal_at(const RayPoint &p) const;
-
-private:
-  static int next_id;
 
 protected:
   virtual std::vector<Intersection>

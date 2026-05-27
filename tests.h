@@ -149,5 +149,23 @@ void test_ring_pattern_alternates_in_both_x_and_z();
 void test_checkers_pattern_alternates_in_x();
 void test_checkers_pattern_alternates_in_y();
 void test_checkers_pattern_alternates_in_z();
+void test_reflectivity_for_default_material();
+void test_precomupting_reflection_vector();
+void test_reflected_color_for_nonreflective_material();
+void test_reflected_color_for_reflective_material();
+void test_shade_hit_with_reflective_material();
+void test_reflected_color_prevents_infinite_recursion();
+void test_transparency_and_refractive_index_for_default_material();
+void test_glass_sphere_init();
+void test_finding_n1_and_n2_at_various_intersections();
+void test_under_point_offset_precomputation();
+void test_refracted_color_of_opaque_surface_is_black();
+void test_refracted_color_under_total_internal_reflection();
+void test_refracted_color_with_a_refracted_ray();
+void test_shade_hit_with_a_transparent_material();
+void test_schlick_approximation_under_total_internal_reflection();
+void test_schlick_approximation_with_a_perpendicular_viewing_angle();
+void test_schlick_approximation_with_a_grazing_angle();
+void test_shade_hit_with_a_reflective_transparent_material();
 
 #endif
