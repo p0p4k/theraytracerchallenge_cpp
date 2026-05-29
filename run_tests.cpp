@@ -152,5 +152,8 @@ void run_tests() {
     test_schlick_approximation_with_a_perpendicular_viewing_angle();
     test_schlick_approximation_with_a_grazing_angle();
     test_shade_hit_with_a_reflective_transparent_material();
+    test_check_axis_behavior();
+    test_cube_intersections();
+    test_cube_normals();
 
 }

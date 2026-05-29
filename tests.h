@@ -167,5 +167,8 @@ void test_schlick_approximation_under_total_internal_reflection();
 void test_schlick_approximation_with_a_perpendicular_viewing_angle();
 void test_schlick_approximation_with_a_grazing_angle();
 void test_shade_hit_with_a_reflective_transparent_material();
+void test_check_axis_behavior();
+void test_cube_intersections();
+void test_cube_normals();
 
 #endif

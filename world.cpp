@@ -1,5 +1,3 @@
-
-
 #include "world.h"
 
 World::World() : light_source(nullptr) {}

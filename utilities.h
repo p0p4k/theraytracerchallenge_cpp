@@ -1,5 +1,6 @@
 #ifndef UTILIIES_H
 #define UTILIIES_H
+#define INF INFINITY
 
 #include <cstdlib>
 

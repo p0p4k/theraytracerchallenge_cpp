@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "color.h"
 #include "computations.h"
+#include "cube.h"
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
@@ -2463,4 +2464,55 @@ void test_shade_hit_with_a_reflective_transparent_material() {
   std::cout << "[PASS 11.18] shade_hit() with Schlick Fresnel integration "
                "works."
             << std::endl;
+}
+
+void test_check_axis_behavior() {
+  auto [t1_min, t1_max] = check_axis(5.0, -1.0);
+  assert(equal(t1_min, 4.0));
+  assert(equal(t1_max, 6.0));
+
+  auto [t2_min, t2_max] = check_axis(-5.0, 1.0);
+  assert(equal(t2_min, 4.0));
+  assert(equal(t2_max, 6.0));
+
+  auto [t3_min, t3_max] = check_axis(0.0, 1.0);
+  assert(equal(t3_min, -1.0));
+  assert(equal(t3_max, 1.0));
+
+  std::cout << "[PASS 12.1] check_axis helper functions works." << std::endl;
+}
+
+void test_cube_intersections() {
+  Cube cube;
+
+  Ray r1(RayPoint(5, 0.5, 0), RayVector(-1, 0, 0));
+  auto xs1 = cube.local_intersects(r1);
+  assert(xs1.size() == 2);
+  assert(equal(xs1[0].t, 4.0));
+  assert(equal(xs1[1].t, 6.0));
+
+  Ray r2(RayPoint(0, -5, 0), RayVector(0, 1, 0));
+  auto xs2 = cube.local_intersects(r2);
+  assert(xs2.size() == 2);
+  assert(equal(xs2[0].t, 4.0));
+  assert(equal(xs2[1].t, 6.0));
+
+  Ray r3(RayPoint(2, 2, 0), RayVector(-1, 0, 0));
+  auto xs3 = cube.local_intersects(r3);
+  assert(xs3.empty());
+
+  std::cout << "[PASS 12.2] Cube local_intersects logic works." << std::endl;
+}
+
+void test_cube_normals() {
+  Cube cube;
+
+  assert(cube.local_normal_at(RayPoint(1, 0.5, -0.8)) == RayVector(1, 0, 0));
+  assert(cube.local_normal_at(RayPoint(-1, -0.2, 0.1)) == RayVector(-1, 0, 0));
+  assert(cube.local_normal_at(RayPoint(0.4, 1, -0.1)) == RayVector(0, 1, 0));
+  assert(cube.local_normal_at(RayPoint(0.3, -1, -0.7)) == RayVector(0, -1, 0));
+  assert(cube.local_normal_at(RayPoint(-0.6, 0.3, 1)) == RayVector(0, 0, 1));
+  assert(cube.local_normal_at(RayPoint(0.4, 0.6, -1)) == RayVector(0, 0, -1));
+
+  std::cout << "[PASS 12.3] Cube local_normal_at works." << std::endl;
 }
