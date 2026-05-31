@@ -3,7 +3,9 @@
 #include "camera.h"
 #include "color.h"
 #include "computations.h"
+#include "cone.h"
 #include "cube.h"
+#include "cylinder.h"
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
@@ -2515,4 +2517,227 @@ void test_cube_normals() {
   assert(cube.local_normal_at(RayPoint(0.4, 0.6, -1)) == RayVector(0, 0, -1));
 
   std::cout << "[PASS 12.3] Cube local_normal_at works." << std::endl;
+}
+
+void test_ray_misses_a_cylinder() {
+  Cylinder cyl;
+  std::vector<std::pair<RayPoint, RayVector>> test_cases = {
+      {RayPoint(1, 0, 0), RayVector(0, 1, 0).normalize()},
+      {RayPoint(0, 0, 0), RayVector(0, 1, 0).normalize()},
+      {RayPoint(0, 0, -5), RayVector(1, 1, 1).normalize()}};
+
+  for (const auto &[origin, direction] : test_cases) {
+    Ray r(origin, direction);
+    auto xs = cyl.local_intersects(r);
+    assert(xs.size() == 0);
+  }
+  std::cout << "[PASS 13.1] A ray missing a cylinder works." << std::endl;
+}
+
+void test_ray_strikes_a_cylinder() {
+  Cylinder cyl;
+
+  Ray r1(RayPoint(1, 0, -5), RayVector(0, 0, 1).normalize());
+  auto xs1 = cyl.local_intersects(r1);
+  assert(xs1.size() == 2);
+  assert(equal(xs1[0].t, 5.0));
+  assert(equal(xs1[1].t, 5.0));
+
+  Ray r2(RayPoint(0, 0, -5), RayVector(0, 0, 1).normalize());
+  auto xs2 = cyl.local_intersects(r2);
+  assert(xs2.size() == 2);
+  assert(equal(xs2[0].t, 4.0));
+  assert(equal(xs2[1].t, 6.0));
+
+  Ray r3(RayPoint(0.5, 0, -5), RayVector(0.1, 1, 1).normalize());
+  auto xs3 = cyl.local_intersects(r3);
+  assert(xs3.size() == 2);
+  assert(equal(xs3[0].t, 6.80798));
+  assert(equal(xs3[1].t, 7.08872));
+
+  std::cout << "[PASS 13.2] A ray striking a cylinder works." << std::endl;
+}
+
+void test_normal_vector_on_a_cylinder() {
+  Cylinder cyl;
+
+  assert(cyl.local_normal_at(RayPoint(1, 0, 0)) == RayVector(1, 0, 0));
+  assert(cyl.local_normal_at(RayPoint(0, 5, -1)) == RayVector(0, 0, -1));
+  assert(cyl.local_normal_at(RayPoint(0, -2, 1)) == RayVector(0, 0, 1));
+  assert(cyl.local_normal_at(RayPoint(-1, 1, 0)) == RayVector(-1, 0, 0));
+
+  std::cout << "[PASS 13.3] Normal vector on a cylinder body works."
+            << std::endl;
+}
+
+void test_default_minimum_and_maximum() {
+  Cylinder cyl;
+  assert(cyl.minimum == -std::numeric_limits<double>::infinity());
+  assert(cyl.maximum == std::numeric_limits<double>::infinity());
+  std::cout << "[PASS 13.4] Default minimum and maximum are correct."
+            << std::endl;
+}
+
+void test_intersecting_a_constrained_cylinder() {
+  Cylinder cyl;
+  cyl.minimum = 1.0;
+  cyl.maximum = 2.0;
+
+  struct TestCase {
+    RayPoint origin;
+    RayVector direction;
+    size_t expected_count;
+  };
+
+  std::vector<TestCase> test_cases = {
+      {RayPoint(0, 1.5, 0), RayVector(0.1, 1, 0).normalize(), 0},
+      {RayPoint(0, 3, -5), RayVector(0, 0, 1).normalize(), 0},
+      {RayPoint(0, 0, -5), RayVector(0, 0, 1).normalize(), 0},
+      {RayPoint(0, 2, -5), RayVector(0, 0, 1).normalize(), 0},
+      {RayPoint(0, 1, -5), RayVector(0, 0, 1).normalize(), 0},
+      {RayPoint(0, 1.5, -2), RayVector(0, 0, 1).normalize(), 2}};
+
+  for (const auto &tc : test_cases) {
+    Ray r(tc.origin, tc.direction);
+    auto xs = cyl.local_intersects(r);
+    assert(xs.size() == tc.expected_count);
+  }
+
+  std::cout << "[PASS 13.5] Intersecting a constrained cylinder works."
+            << std::endl;
+}
+
+void test_default_closed_value() {
+  Cylinder cyl;
+  assert(cyl.closed == false);
+  std::cout << "[PASS 13.6] Default closed value is false." << std::endl;
+}
+
+void test_intersecting_caps_of_a_closed_cylinder() {
+  Cylinder cyl;
+  cyl.minimum = 1.0;
+  cyl.maximum = 2.0;
+  cyl.closed = true;
+
+  struct TestCase {
+    RayPoint origin;
+    RayVector direction;
+    size_t expected_count;
+  };
+
+  std::vector<TestCase> test_cases = {
+      {RayPoint(0, 3, 0), RayVector(0, -1, 0).normalize(), 2},
+      {RayPoint(0, 3, -2), RayVector(0, -1, 2).normalize(), 2},
+      {RayPoint(0, 4, -2), RayVector(0, -1, 1).normalize(), 2},
+      {RayPoint(0, 0, -2), RayVector(0, 1, 2).normalize(), 2},
+      {RayPoint(0, -1, -2), RayVector(0, 1, 1).normalize(), 2}};
+
+  for (const auto &tc : test_cases) {
+    Ray r(tc.origin, tc.direction);
+    auto xs = cyl.local_intersects(r);
+    assert(xs.size() == tc.expected_count);
+  }
+
+  std::cout << "[PASS 13.7] Intersecting the caps of a closed cylinder works."
+            << std::endl;
+}
+
+void test_normal_vector_on_a_cylinders_end_caps() {
+  Cylinder cyl;
+  cyl.minimum = 1.0;
+  cyl.maximum = 2.0;
+  cyl.closed = true;
+
+  assert(cyl.local_normal_at(RayPoint(0, 1, 0)) == RayVector(0, -1, 0));
+  assert(cyl.local_normal_at(RayPoint(0.5, 1, 0)) == RayVector(0, -1, 0));
+  assert(cyl.local_normal_at(RayPoint(0, 1, 0.5)) == RayVector(0, -1, 0));
+
+  assert(cyl.local_normal_at(RayPoint(0, 2, 0)) == RayVector(0, 1, 0));
+  assert(cyl.local_normal_at(RayPoint(0.5, 2, 0)) == RayVector(0, 1, 0));
+  assert(cyl.local_normal_at(RayPoint(0, 2, 0.5)) == RayVector(0, 1, 0));
+
+  std::cout << "[PASS 13.8] Normal vector on cylinder end caps works perfectly."
+            << std::endl;
+}
+
+void test_intersecting_a_cone_with_a_ray() {
+  Cone shape;
+
+  struct TestCase {
+    RayPoint origin;
+    RayVector direction;
+    double t0;
+    double t1;
+  };
+
+  std::vector<TestCase> test_cases = {
+      {RayPoint(0, 0, -5), RayVector(0, 0, 1).normalize(), 5.0, 5.0},
+      {RayPoint(0, 0, -5), RayVector(1, 1, 1).normalize(), 8.66025, 8.66025},
+      {RayPoint(1, 1, -5), RayVector(-0.5, -1, 1).normalize(), 4.55006,
+       49.44994}};
+
+  for (const auto &tc : test_cases) {
+    Ray r(tc.origin, tc.direction);
+    auto xs = shape.local_intersects(r);
+    assert(xs.size() == 2);
+    assert(equal(xs[0].t, tc.t0));
+    assert(equal(xs[1].t, tc.t1));
+  }
+  std::cout << "[PASS 13.9] Intersecting a cone with a ray works." << std::endl;
+}
+
+void test_intersecting_cone_with_ray_parallel_to_one_half() {
+  Cone shape;
+
+  Ray r(RayPoint(0, 0, -1), RayVector(0, 1, 1).normalize());
+  auto xs = shape.local_intersects(r);
+
+  assert(xs.size() == 1);
+
+  assert(equal(xs[0].t, 0.35355));
+
+  std::cout << "[PASS 13.10] Intersecting a cone with a parallel ray works."
+            << std::endl;
+}
+
+void test_intersecting_a_cones_end_caps() {
+  Cone shape;
+  shape.minimum = -0.5;
+  shape.maximum = 0.5;
+  shape.closed = true;
+
+  struct TestCase {
+    RayPoint origin;
+    RayVector direction;
+    size_t expected_count;
+  };
+
+  std::vector<TestCase> test_cases = {
+      {RayPoint(0, 0, -5), RayVector(0, 1, 0).normalize(), 0},
+
+      {RayPoint(0, 0, -0.25), RayVector(0, 1, 1).normalize(), 2},
+
+      {RayPoint(0, 0, -0.25), RayVector(0, 1, 0).normalize(), 4}};
+
+  for (const auto &tc : test_cases) {
+    Ray r(tc.origin, tc.direction);
+    auto xs = shape.local_intersects(r);
+    assert(xs.size() == tc.expected_count);
+  }
+  std::cout << "[PASS 13.11] Intersecting a cone's end caps works perfectly."
+            << std::endl;
+}
+
+void test_computing_the_normal_vector_on_a_cone() {
+  Cone shape;
+
+  assert(shape.local_normal_at(RayPoint(0, 0, 0)) == RayVector(0, 0, 0));
+
+  assert(shape.local_normal_at(RayPoint(1, 1, 1)) ==
+         RayVector(1, -std::sqrt(2.0), 1));
+
+  assert(shape.local_normal_at(RayPoint(-1, -1, 0)) == RayVector(-1, 1, 0));
+
+  std::cout << "[PASS 13.12] Normal vectors on a cone are calculated correctly."
+            << std::endl;
 }

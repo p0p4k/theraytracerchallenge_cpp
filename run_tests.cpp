@@ -155,5 +155,17 @@ void run_tests() {
     test_check_axis_behavior();
     test_cube_intersections();
     test_cube_normals();
+    test_ray_misses_a_cylinder();
+    test_ray_strikes_a_cylinder();
+    test_normal_vector_on_a_cylinder();
+    test_default_minimum_and_maximum();
+    test_intersecting_a_constrained_cylinder();
+    test_default_closed_value();
+    test_intersecting_caps_of_a_closed_cylinder();
+    test_normal_vector_on_a_cylinders_end_caps();
+    test_intersecting_a_cone_with_a_ray();
+    test_intersecting_cone_with_ray_parallel_to_one_half();
+    test_intersecting_a_cones_end_caps();
+    test_computing_the_normal_vector_on_a_cone();
 
 }

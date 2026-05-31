@@ -170,5 +170,17 @@ void test_shade_hit_with_a_reflective_transparent_material();
 void test_check_axis_behavior();
 void test_cube_intersections();
 void test_cube_normals();
+void test_ray_misses_a_cylinder();
+void test_ray_strikes_a_cylinder();
+void test_normal_vector_on_a_cylinder();
+void test_default_minimum_and_maximum();
+void test_intersecting_a_constrained_cylinder();
+void test_default_closed_value();
+void test_intersecting_caps_of_a_closed_cylinder();
+void test_normal_vector_on_a_cylinders_end_caps();
+void test_intersecting_a_cone_with_a_ray();
+void test_intersecting_cone_with_ray_parallel_to_one_half();
+void test_intersecting_a_cones_end_caps();
+void test_computing_the_normal_vector_on_a_cone();
 
 #endif
