@@ -2,7 +2,6 @@
 #include "canvas.h"
 #include "color.h"
 #include "cone.h"
-#include "cube.h"
 #include "cylinder.h"
 #include "light_source.h"
 #include "matrix.h"
