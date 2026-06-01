@@ -14,7 +14,8 @@ public:
 
   std::vector<Intersection>
   local_intersects(const Ray &local_ray) const override;
-  RayVector local_normal_at(const RayPoint &) const override;
+  RayVector local_normal_at(const RayPoint &local_point,
+                            const Intersection *hit = nullptr) const override;
 
   std::vector<Shape *> child;
   void add_child(Shape *shape);

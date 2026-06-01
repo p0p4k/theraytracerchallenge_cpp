@@ -1,14 +1,19 @@
-#ifndef PLANE_H
-#define PLANE_H
+#ifndef TRIANGLE_H
+#define TRIANGLE_H
 
-#include "material.h"
-#include "matrix.h"
+#include "bounding_box.h"
 #include "shapes.h"
 #include "tuple.h"
+#include <vector>
 
-class Plane : public Shape {
+class Triangle : public Shape {
 public:
-  Plane(const Material &material = Material());
+  RayPoint p1, p2, p3;
+  RayVector e1, e2;
+  RayVector normal;
+
+  Triangle(RayPoint p1, RayPoint p2, RayPoint p3,
+           const Material &material = Material());
 
   std::vector<Intersection>
   local_intersects(const Ray &local_ray) const override;

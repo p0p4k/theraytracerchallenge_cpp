@@ -21,7 +21,8 @@ public:
 
   std::vector<Intersection>
   local_intersects(const Ray &local_ray) const override;
-  RayVector local_normal_at(const RayPoint &point) const override;
+  RayVector local_normal_at(const RayPoint &local_point,
+                            const Intersection *hit = nullptr) const override;
 
   void intersect_caps(const Ray &ray, std::vector<Intersection> *xs) const;
   BoundingBox bounds_of() const override;

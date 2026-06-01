@@ -5,7 +5,7 @@
 
 Plane::Plane(const Material &material) : Shape(material) {}
 
-RayVector Plane::local_normal_at(const RayPoint &) const {
+RayVector Plane::local_normal_at(const RayPoint &, const Intersection *) const {
   return RayVector(0, 1, 0);
 }
 

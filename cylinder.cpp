@@ -1,4 +1,5 @@
 #include "cylinder.h"
+#include "intersection.h"
 
 Cylinder::Cylinder(const Material &material, bool closed)
     : Shape(material), closed(closed) {}
@@ -71,7 +72,8 @@ void Cylinder::intersect_caps(const Ray &ray,
   return;
 }
 
-RayVector Cylinder::local_normal_at(const RayPoint &point) const {
+RayVector Cylinder::local_normal_at(const RayPoint &point,
+                                    const Intersection *) const {
   double dist = point.x * point.x + point.z * point.z;
   if (dist < 1 && point.y >= maximum - EPSILON) {
     return RayVector(0, 1, 0);

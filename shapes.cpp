@@ -16,11 +16,10 @@ std::vector<Intersection> Shape::intersects(const Ray &world_ray) const {
   return this->local_intersects(local_ray);
 }
 
-RayVector Shape::normal_at(const RayPoint &world_point) const {
-  // RayPoint local_point =
-  // this->inverse_transform.transform_point(world_point);
+RayVector Shape::normal_at(const RayPoint &world_point,
+                           const Intersection *hit) const {
   RayPoint local_point = world_to_object(world_point);
-  RayVector local_normal = this->local_normal_at(local_point);
+  RayVector local_normal = this->local_normal_at(local_point, hit);
   return normal_to_world(local_normal);
 }
 

@@ -9,7 +9,10 @@ class Intersection {
 public:
   double t;
   Shape *object;
-  Intersection(double t, Shape *object) : t(t), object(object) {}
+  double u;
+  double v;
+  Intersection(double t, Shape *object, double u = 0.0, double v = 0.0)
+      : t(t), object(object), u(u), v(v) {}
 
   bool operator<(const Intersection &other) const { return t < other.t; }
   bool operator==(const Intersection &other) const {

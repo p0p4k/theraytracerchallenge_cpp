@@ -5,7 +5,8 @@
 
 Cube::Cube(const Material &material) : Shape(material) {}
 
-RayVector Cube::local_normal_at(const RayPoint &point) const {
+RayVector Cube::local_normal_at(const RayPoint &point,
+                                const Intersection *) const {
   double maxc =
       std::max({std::abs(point.x), std::abs(point.y), std::abs(point.z)});
 

@@ -10,11 +10,13 @@
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
+#include "obj_parser.h"
 #include "pattern.h"
 #include "plane.h"
 #include "ray.h"
 #include "shapes.h"
 #include "sphere.h"
+#include "triangle.h"
 #include "tuple.h"
 #include "utilities.h"
 #include "world.h"
@@ -2883,5 +2885,329 @@ void test_finding_the_normal_on_a_child_object() {
   assert(equal(n.z, -0.85716));
 
   std::cout << "[PASS 14.9] Finding normal on a nested child object works."
+            << std::endl;
+}
+
+void test_constructing_a_triangle() {
+  RayPoint p1(0, 1, 0);
+  RayPoint p2(-1, 0, 0);
+  RayPoint p3(1, 0, 0);
+  Triangle t(p1, p2, p3);
+
+  assert(t.p1 == p1);
+  assert(t.p2 == p2);
+  assert(t.p3 == p3);
+  assert(t.e1 == RayVector(-1, -1, 0));
+  assert(t.e2 == RayVector(1, -1, 0));
+  assert(t.normal == RayVector(0, 0, -1));
+
+  std::cout
+      << "[PASS 15.1] Constructing a triangle calculates edges and normal."
+      << std::endl;
+}
+
+void test_finding_the_normal_on_a_triangle() {
+  Triangle t(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0));
+
+  RayVector n1 = t.local_normal_at(RayPoint(0, 0.5, 0));
+  RayVector n2 = t.local_normal_at(RayPoint(-0.5, 0.75, 0));
+  RayVector n3 = t.local_normal_at(RayPoint(0.5, 0.25, 0));
+
+  assert(n1 == t.normal);
+  assert(n2 == t.normal);
+  assert(n3 == t.normal);
+
+  std::cout << "[PASS 15.2] Normal on a triangle is consistent everywhere."
+            << std::endl;
+}
+
+void test_intersecting_ray_parallel_to_the_triangle() {
+  Triangle t(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0));
+  Ray r(RayPoint(0, -1, -2), RayVector(0, 1, 0));
+  auto xs = t.local_intersects(r);
+  assert(xs.size() == 0);
+  std::cout << "[PASS 15.3] Ray parallel to the triangle misses." << std::endl;
+}
+
+void test_ray_misses_the_p1_p3_edge() {
+  Triangle t(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0));
+  Ray r(RayPoint(1, 1, -2), RayVector(0, 0, 1));
+  auto xs = t.local_intersects(r);
+  assert(xs.size() == 0);
+  std::cout << "[PASS 15.4] Ray misses the p1-p3 edge." << std::endl;
+}
+
+void test_ray_misses_the_p1_p2_edge() {
+  Triangle t(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0));
+  Ray r(RayPoint(-1, 1, -2), RayVector(0, 0, 1));
+  auto xs = t.local_intersects(r);
+  assert(xs.size() == 0);
+  std::cout << "[PASS 15.5] Ray misses the p1-p2 edge." << std::endl;
+}
+
+void test_ray_misses_the_p2_p3_edge() {
+  Triangle t(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0));
+  Ray r(RayPoint(0, -1, -2), RayVector(0, 0, 1));
+  auto xs = t.local_intersects(r);
+  assert(xs.size() == 0);
+  std::cout << "[PASS 15.6] Ray misses the p2-p3 edge." << std::endl;
+}
+
+void test_ray_strikes_a_triangle() {
+  Triangle t(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0));
+  Ray r(RayPoint(0, 0.5, -2), RayVector(0, 0, 1));
+  auto xs = t.local_intersects(r);
+
+  assert(xs.size() == 1);
+  assert(equal(xs[0].t, 2.0));
+
+  std::cout << "[PASS 15.7] Ray cleanly strikes the inside of a triangle."
+            << std::endl;
+}
+
+void test_triangle_bounding_box() {
+  RayPoint p1(-3, 7, 2);
+  RayPoint p2(6, 2, -4);
+  RayPoint p3(2, -1, 5);
+  Triangle t(p1, p2, p3);
+
+  BoundingBox box = t.bounds_of();
+
+  assert(box.min_point == RayPoint(-3, -1, -4));
+  assert(box.max_point == RayPoint(6, 7, 5));
+
+  std::cout
+      << "[PASS 15.8] Triangle bounding box completely encapsulates points."
+      << std::endl;
+}
+
+void test_ignoring_unrecognized_lines() {
+  std::string obj_data = "There was a young lady named Bright\n"
+                         "who traveled much faster than light.\n"
+                         "She set out one day\n"
+                         "in a relative way,\n"
+                         "and came back the previous night.\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+
+  assert(parser.ignored_lines == 5);
+  std::cout << "[PASS 15.9] OBJ Parser ignores unrecognized lines."
+            << std::endl;
+}
+
+void test_vertex_records() {
+  std::string obj_data = "v -1 1 0\n"
+                         "v -1.0000 0.5000 0.0000\n"
+                         "v 1 0 0\n"
+                         "v 1 1 0\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+
+  assert(parser.vertices[1] == RayPoint(-1, 1, 0));
+  assert(parser.vertices[2] == RayPoint(-1, 0.5, 0));
+  assert(parser.vertices[3] == RayPoint(1, 0, 0));
+  assert(parser.vertices[4] == RayPoint(1, 1, 0));
+
+  std::cout << "[PASS 15.10] OBJ Parser reads vertex records correctly."
+            << std::endl;
+}
+
+void test_parsing_triangle_faces() {
+  std::string obj_data = "v -1 1 0\n"
+                         "v -1 0 0\n"
+                         "v 1 0 0\n"
+                         "v 1 1 0\n"
+                         "f 1 2 3\n"
+                         "f 1 3 4\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+
+  Group *g = parser.default_group;
+  assert(g->child.size() == 2);
+
+  Triangle *t1 = dynamic_cast<Triangle *>(g->child[0]);
+  Triangle *t2 = dynamic_cast<Triangle *>(g->child[1]);
+
+  assert(t1->p1 == parser.vertices[1]);
+  assert(t1->p2 == parser.vertices[2]);
+  assert(t1->p3 == parser.vertices[3]);
+
+  assert(t2->p1 == parser.vertices[1]);
+  assert(t2->p2 == parser.vertices[3]);
+  assert(t2->p3 == parser.vertices[4]);
+
+  std::cout << "[PASS 15.11] OBJ Parser parses standard triangle faces."
+            << std::endl;
+}
+
+void test_triangulating_polygons() {
+  std::string obj_data = "v -1 1 0\n"
+                         "v -1 0 0\n"
+                         "v 1 0 0\n"
+                         "v 1 1 0\n"
+                         "v 0 2 0\n"
+                         "f 1 2 3 4 5\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+
+  Group *g = parser.default_group;
+  assert(g->child.size() == 3);
+
+  Triangle *t1 = dynamic_cast<Triangle *>(g->child[0]);
+  Triangle *t2 = dynamic_cast<Triangle *>(g->child[1]);
+  Triangle *t3 = dynamic_cast<Triangle *>(g->child[2]);
+
+  assert(t1->p1 == parser.vertices[1]);
+  assert(t1->p2 == parser.vertices[2]);
+  assert(t1->p3 == parser.vertices[3]);
+
+  assert(t2->p1 == parser.vertices[1]);
+  assert(t2->p2 == parser.vertices[3]);
+  assert(t2->p3 == parser.vertices[4]);
+
+  assert(t3->p1 == parser.vertices[1]);
+  assert(t3->p2 == parser.vertices[4]);
+  assert(t3->p3 == parser.vertices[5]);
+
+  std::cout << "[PASS 15.12] OBJ Parser performs fan triangulation on polygons."
+            << std::endl;
+}
+
+void test_triangles_in_named_groups() {
+  std::string obj_data = "v -1 1 0\n"
+                         "v -1 0 0\n"
+                         "v 1 0 0\n"
+                         "v 1 1 0\n"
+                         "\n"
+                         "g FirstGroup\n"
+                         "f 1 2 3\n"
+                         "g SecondGroup\n"
+                         "f 1 3 4\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+
+  Group *g1 = parser.named_groups["FirstGroup"];
+  Group *g2 = parser.named_groups["SecondGroup"];
+
+  assert(g1->child.size() == 1);
+  assert(g2->child.size() == 1);
+
+  Triangle *t1 = dynamic_cast<Triangle *>(g1->child[0]);
+  Triangle *t2 = dynamic_cast<Triangle *>(g2->child[0]);
+
+  assert(t1->p1 == parser.vertices[1]);
+  assert(t2->p1 == parser.vertices[1]);
+
+  std::cout << "[PASS 15.13] OBJ Parser routes faces to named groups."
+            << std::endl;
+}
+
+void test_constructing_smooth_triangle() {
+  RayPoint p1(0, 1, 0), p2(-1, 0, 0), p3(1, 0, 0);
+  RayVector n1(0, 1, 0), n2(-1, 0, 0), n3(1, 0, 0);
+  SmoothTriangle tri(p1, p2, p3, n1, n2, n3);
+
+  assert(tri.p1 == p1);
+  assert(tri.p2 == p2);
+  assert(tri.p3 == p3);
+  assert(tri.n1 == n1);
+  assert(tri.n2 == n2);
+  assert(tri.n3 == n3);
+
+  std::cout << "[PASS 15.14] Constructing a smooth triangle works."
+            << std::endl;
+}
+
+void test_intersection_can_encapsulate_u_and_v() {
+  SmoothTriangle s(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0),
+                   RayVector(0, 1, 0), RayVector(-1, 0, 0), RayVector(1, 0, 0));
+  Intersection i(3.5, &s, 0.2, 0.4);
+
+  assert(equal(i.u, 0.2));
+  assert(equal(i.v, 0.4));
+
+  std::cout << "[PASS 15.15] Intersection object correctly stores u and v."
+            << std::endl;
+}
+
+void test_intersecting_smooth_triangle_stores_uv() {
+  SmoothTriangle tri(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0),
+                     RayVector(0, 1, 0), RayVector(-1, 0, 0),
+                     RayVector(1, 0, 0));
+  Ray r(RayPoint(-0.2, 0.3, -2), RayVector(0, 0, 1));
+  auto xs = tri.local_intersects(r);
+
+  assert(xs.size() == 1);
+  assert(equal(xs[0].u, 0.45));
+  assert(equal(xs[0].v, 0.25));
+
+  std::cout << "[PASS 15.16] Intersecting a smooth triangle calculates u and v."
+            << std::endl;
+}
+
+void test_smooth_triangle_interpolates_normal() {
+  SmoothTriangle tri(RayPoint(0, 1, 0), RayPoint(-1, 0, 0), RayPoint(1, 0, 0),
+                     RayVector(0, 1, 0), RayVector(-1, 0, 0),
+                     RayVector(1, 0, 0));
+  Intersection i(1.0, &tri, 0.45, 0.25);
+  RayVector n = tri.normal_at(RayPoint(0, 0, 0), &i);
+
+  assert(n == RayVector(-0.5547, 0.83205, 0));
+
+  std::cout
+      << "[PASS 15.17] Smooth triangle correctly interpolates surface normals."
+      << std::endl;
+}
+
+void test_parser_recognizes_vertex_normals() {
+  std::string obj_data = "vn 0 0 1\n"
+                         "vn 0.707 0 -0.707\n"
+                         "vn 1 2 3\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+
+  assert(parser.normals[1] == RayVector(0, 0, 1));
+  assert(parser.normals[2] == RayVector(0.707, 0, -0.707));
+  assert(parser.normals[3] == RayVector(1, 2, 3));
+
+  std::cout << "[PASS 15.18] OBJ Parser reads vertex normal (vn) records."
+            << std::endl;
+}
+
+void test_parser_creates_smooth_triangles() {
+  std::string obj_data = "v 0 1 0\n"
+                         "v -1 0 0\n"
+                         "v 1 0 0\n"
+                         "vn 0 1 0\n"
+                         "vn -1 0 0\n"
+                         "vn 1 0 0\n"
+                         "f 1//1 2//2 3//3\n"
+                         "f 1/1/1 2/2/2 3/3/3\n";
+
+  ObjParser parser;
+  parser.parse_string(obj_data);
+  Group *g = parser.default_group;
+
+  SmoothTriangle *t1 = dynamic_cast<SmoothTriangle *>(g->child[0]);
+  SmoothTriangle *t2 = dynamic_cast<SmoothTriangle *>(g->child[1]);
+
+  assert(t1 != nullptr);
+  assert(t1->n1 == parser.normals[1]);
+  assert(t1->n2 == parser.normals[2]);
+  assert(t1->n3 == parser.normals[3]);
+
+  assert(t2 != nullptr);
+  assert(t2->n1 == parser.normals[1]);
+  assert(t2->n2 == parser.normals[2]);
+  assert(t2->n3 == parser.normals[3]);
+
+  std::cout << "[PASS 15.19] OBJ Parser constructs SmoothTriangles from faces "
+               "with normals."
             << std::endl;
 }

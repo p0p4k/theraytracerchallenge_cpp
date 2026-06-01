@@ -23,7 +23,6 @@ public:
 
   void set_transform(const Matrix &transformation);
   std::vector<Intersection> intersects(const Ray &world_ray) const;
-  RayVector normal_at(const RayPoint &p) const;
 
   RayPoint world_to_object(RayPoint point) const;
 
@@ -33,12 +32,16 @@ public:
 
   virtual BoundingBox bounds_of() const = 0;
   BoundingBox parent_space_bounds_of() const;
+  RayVector normal_at(const RayPoint &p,
+                      const Intersection *hit = nullptr) const;
 
 protected:
   virtual std::vector<Intersection>
   local_intersects(const Ray &local_ray) const = 0;
 
-  virtual RayVector local_normal_at(const RayPoint &local_point) const = 0;
+  virtual RayVector
+  local_normal_at(const RayPoint &local_point,
+                  const Intersection *hit = nullptr) const = 0;
 };
 
 class TestShape : public Shape {
@@ -55,7 +58,8 @@ protected:
     return std::vector<Intersection>();
   }
 
-  RayVector local_normal_at(const RayPoint &local_point) const override {
+  RayVector local_normal_at(const RayPoint &local_point,
+                            const Intersection *) const override {
     return RayVector(local_point.x, local_point.y, local_point.z);
   }
 

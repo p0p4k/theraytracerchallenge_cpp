@@ -1,4 +1,5 @@
 #include "cone.h"
+#include "intersection.h"
 
 Cone::Cone(const Material &material, bool closed)
     : Shape(material), closed(closed) {}
@@ -80,7 +81,8 @@ void Cone::intersect_caps(const Ray &ray, std::vector<Intersection> *xs) const {
   }
 }
 
-RayVector Cone::local_normal_at(const RayPoint &point) const {
+RayVector Cone::local_normal_at(const RayPoint &point,
+                                const Intersection *) const {
   double dist = point.x * point.x + point.z * point.z;
 
   if (dist < (point.y * point.y) && point.y >= maximum - EPSILON) {

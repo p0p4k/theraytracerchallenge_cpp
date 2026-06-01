@@ -176,5 +176,25 @@ void run_tests() {
     test_converting_point_from_world_to_object_space();
     test_converting_normal_from_object_to_world_space();
     test_finding_the_normal_on_a_child_object();
+    test_constructing_a_triangle();
+    test_finding_the_normal_on_a_triangle();
+    test_intersecting_ray_parallel_to_the_triangle();
+    test_ray_misses_the_p1_p3_edge();
+    test_ray_misses_the_p1_p2_edge();
+    test_ray_misses_the_p2_p3_edge();
+    test_ray_strikes_a_triangle();
+    test_triangle_bounding_box();
+    test_ignoring_unrecognized_lines();
+    test_vertex_records();
+    test_parsing_triangle_faces();
+    test_triangulating_polygons();
+    test_triangles_in_named_groups();
+    test_constructing_smooth_triangle();
+    test_intersection_can_encapsulate_u_and_v();
+    test_intersecting_smooth_triangle_stores_uv();
+    test_smooth_triangle_interpolates_normal();
+    test_parser_recognizes_vertex_normals();
+    test_parser_creates_smooth_triangles();
+    test_faces_with_normal_vectors();
 
 }

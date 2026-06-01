@@ -1,4 +1,5 @@
 #include "groups.h"
+#include "intersection.h"
 
 Group::Group(const Material &material) : Shape(material) {}
 
@@ -21,7 +22,7 @@ std::vector<Intersection> Group::local_intersects(const Ray &local_ray) const {
   return intersections;
 }
 
-RayVector Group::local_normal_at(const RayPoint &) const {
+RayVector Group::local_normal_at(const RayPoint &, const Intersection *) const {
   throw std::logic_error(
       "Method local_normal_at should never be called on a Group directly.");
 }

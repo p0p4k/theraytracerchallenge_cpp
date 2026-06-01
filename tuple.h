@@ -56,7 +56,7 @@ inline bool operator!=(const RayTuple &t1, const RayTuple &t2) {
 }
 
 inline RayVector operator+(const RayVector &v1, const RayVector &v2) {
-  return RayVector(v1.x + v2.x, v1.y + v2.y, v1.y + v2.y);
+  return RayVector(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
 
 inline RayPoint operator+(const RayPoint &p, const RayVector &v) {

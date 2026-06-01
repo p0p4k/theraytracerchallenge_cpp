@@ -27,7 +27,8 @@ std::vector<Intersection> Sphere::local_intersects(const Ray &local_ray) const {
   return intersections;
 }
 
-RayVector Sphere::local_normal_at(const RayPoint &local_point) const {
+RayVector Sphere::local_normal_at(const RayPoint &local_point,
+                                  const Intersection *) const {
   return local_point - RayPoint(0, 0, 0);
 }
 

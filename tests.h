@@ -191,5 +191,25 @@ void test_intersecting_transformed_group();
 void test_converting_point_from_world_to_object_space();
 void test_converting_normal_from_object_to_world_space();
 void test_finding_the_normal_on_a_child_object();
+void test_constructing_a_triangle();
+void test_finding_the_normal_on_a_triangle();
+void test_intersecting_ray_parallel_to_the_triangle();
+void test_ray_misses_the_p1_p3_edge();
+void test_ray_misses_the_p1_p2_edge();
+void test_ray_misses_the_p2_p3_edge();
+void test_ray_strikes_a_triangle();
+void test_triangle_bounding_box();
+void test_ignoring_unrecognized_lines();
+void test_vertex_records();
+void test_parsing_triangle_faces();
+void test_triangulating_polygons();
+void test_triangles_in_named_groups();
+void test_constructing_smooth_triangle();
+void test_intersection_can_encapsulate_u_and_v();
+void test_intersecting_smooth_triangle_stores_uv();
+void test_smooth_triangle_interpolates_normal();
+void test_parser_recognizes_vertex_normals();
+void test_parser_creates_smooth_triangles();
+void test_faces_with_normal_vectors();
 
 #endif
