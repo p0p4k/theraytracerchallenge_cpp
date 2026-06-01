@@ -15,6 +15,8 @@ public:
   local_intersects(const Ray &local_ray) const override;
   RayVector local_normal_at(const RayPoint &p) const override;
 
+  BoundingBox bounds_of() const override;
+
   static Sphere *glass_sphere() {
     Sphere *s = new Sphere();
     s->material.transparency = 1.0;

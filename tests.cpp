@@ -6,6 +6,7 @@
 #include "cone.h"
 #include "cube.h"
 #include "cylinder.h"
+#include "groups.h"
 #include "intersection.h"
 #include "light_source.h"
 #include "matrix.h"
@@ -2739,5 +2740,148 @@ void test_computing_the_normal_vector_on_a_cone() {
   assert(shape.local_normal_at(RayPoint(-1, -1, 0)) == RayVector(-1, 1, 0));
 
   std::cout << "[PASS 13.12] Normal vectors on a cone are calculated correctly."
+            << std::endl;
+}
+
+void test_creating_new_group() {
+  Group g;
+  assert(g.transform == Matrix::identity(4));
+
+  std::cout << "[PASS 14.1] Group is empty works." << std::endl;
+}
+
+void test_add_child_to_group() {
+  Group g;
+  TestShape *s = new TestShape;
+  g.add_child(s);
+  assert(s->parent == &g);
+
+  std::cout << "[PASS 14.2] Group adding a child works." << std::endl;
+
+  delete s;
+}
+
+void test_shape_has_parent() {
+  TestShape s;
+  assert(!s.parent);
+
+  std::cout << "[PASS 14.3] Parent in shape works." << std::endl;
+}
+
+void test_ray_interesecting_with_empty_group() {
+  Group g;
+  Ray r(RayPoint(0, 0, 0), RayVector(0, 0, 1));
+  std::vector<Intersection> xs = g.intersects(r);
+  assert(xs.size() == 0);
+
+  std::cout << "[PASS 14.4] Empty group interesects ray works." << std::endl;
+}
+
+void test_ray_interesecting_with_non_empty_group() {
+  Group g;
+  Sphere *s1 = new Sphere;
+  Sphere *s2 = new Sphere;
+  s2->set_transform(Matrix::translation(0, 0, -3));
+  Sphere *s3 = new Sphere;
+  s3->set_transform(Matrix::translation(5, 0, 0));
+  g.add_child(s1);
+  g.add_child(s2);
+  g.add_child(s3);
+  Ray r(RayPoint(0, 0, -5), RayVector(0, 0, 1));
+  std::vector<Intersection> xs = g.intersects(r);
+  assert(xs.size() == 4);
+  assert(xs[0].object == s2);
+  assert(xs[1].object == s2);
+  assert(xs[2].object == s1);
+  assert(xs[3].object == s1);
+
+  std::cout << "[PASS 14.5] Non-empty group intersects correctly and sorts by "
+               "hit works."
+            << std::endl;
+}
+
+void test_intersecting_transformed_group() {
+  Group g;
+  g.set_transform(Matrix::scaling(2, 2, 2));
+
+  Sphere *s = new Sphere;
+  s->set_transform(Matrix::translation(5, 0, 0));
+  g.add_child(s);
+
+  Ray r(RayPoint(10, 0, -10), RayVector(0, 0, 1));
+  std::vector<Intersection> xs = g.intersects(r);
+
+  assert(xs.size() == 2);
+  assert(xs[0].object == s);
+  assert(xs[1].object == s);
+
+  std::cout << "[PASS 14.6] Intersecting a transformed group works."
+            << std::endl;
+}
+
+void test_converting_point_from_world_to_object_space() {
+  Group *g1 = new Group();
+  g1->set_transform(Matrix::rotation_y(M_PI / 2.0));
+
+  Group *g2 = new Group();
+  g2->set_transform(Matrix::scaling(2, 2, 2));
+  g1->add_child(g2);
+
+  Sphere *s = new Sphere();
+  s->set_transform(Matrix::translation(5, 0, 0));
+  g2->add_child(s);
+
+  RayPoint p = s->world_to_object(RayPoint(-2, 0, -10));
+
+  assert(equal(p.x, 0.0));
+  assert(equal(p.y, 0.0));
+  assert(equal(p.z, -1.0));
+
+  std::cout << "[PASS 14.7] Converting world point to object space works."
+            << std::endl;
+}
+
+void test_converting_normal_from_object_to_world_space() {
+  Group *g1 = new Group();
+  g1->set_transform(Matrix::rotation_y(M_PI / 2.0));
+
+  Group *g2 = new Group();
+  g2->set_transform(Matrix::scaling(1, 2, 3));
+  g1->add_child(g2);
+
+  Sphere *s = new Sphere();
+  s->set_transform(Matrix::translation(5, 0, 0));
+  g2->add_child(s);
+
+  double root3 = std::sqrt(3.0) / 3.0;
+  RayVector n = s->normal_to_world(RayVector(root3, root3, root3));
+
+  assert(equal(n.x, 0.28571));
+  assert(equal(n.y, 0.42857));
+  assert(equal(n.z, -0.85714));
+
+  std::cout << "[PASS 14.8] Converting object normal to world space works."
+            << std::endl;
+}
+
+void test_finding_the_normal_on_a_child_object() {
+  Group *g1 = new Group();
+  g1->set_transform(Matrix::rotation_y(M_PI / 2.0));
+
+  Group *g2 = new Group();
+  g2->set_transform(Matrix::scaling(1, 2, 3));
+  g1->add_child(g2);
+
+  Sphere *s = new Sphere();
+  s->set_transform(Matrix::translation(5, 0, 0));
+  g2->add_child(s);
+
+  RayVector n = s->normal_at(RayPoint(1.7321, 1.1547, -5.5774));
+
+  assert(equal(n.x, 0.28570));
+  assert(equal(n.y, 0.42854));
+  assert(equal(n.z, -0.85716));
+
+  std::cout << "[PASS 14.9] Finding normal on a nested child object works."
             << std::endl;
 }

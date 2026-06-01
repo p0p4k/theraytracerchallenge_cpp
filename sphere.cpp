@@ -30,3 +30,7 @@ std::vector<Intersection> Sphere::local_intersects(const Ray &local_ray) const {
 RayVector Sphere::local_normal_at(const RayPoint &local_point) const {
   return local_point - RayPoint(0, 0, 0);
 }
+
+BoundingBox Sphere::bounds_of() const {
+  return BoundingBox(RayPoint(-1, -1, -1), RayPoint(1, 1, 1));
+}

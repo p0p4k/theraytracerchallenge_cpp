@@ -23,6 +23,7 @@ public:
   RayVector local_normal_at(const RayPoint &point) const override;
 
   void intersect_caps(const Ray &ray, std::vector<Intersection> *xs) const;
+  BoundingBox bounds_of() const override;
 };
 
 bool check_cone_cap(const Ray &ray, double t, double cap_y);

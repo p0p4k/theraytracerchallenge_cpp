@@ -1,6 +1,7 @@
 #ifndef SHAPES_H
 #define SHAPES_H
 
+#include "bounding_box.h"
 #include "intersection.h"
 #include "material.h"
 #include "matrix.h"
@@ -23,6 +24,15 @@ public:
   void set_transform(const Matrix &transformation);
   std::vector<Intersection> intersects(const Ray &world_ray) const;
   RayVector normal_at(const RayPoint &p) const;
+
+  RayPoint world_to_object(RayPoint point) const;
+
+  RayVector normal_to_world(RayVector normal) const;
+
+  Shape *parent = nullptr;
+
+  virtual BoundingBox bounds_of() const = 0;
+  BoundingBox parent_space_bounds_of() const;
 
 protected:
   virtual std::vector<Intersection>
@@ -47,6 +57,10 @@ protected:
 
   RayVector local_normal_at(const RayPoint &local_point) const override {
     return RayVector(local_point.x, local_point.y, local_point.z);
+  }
+
+  BoundingBox bounds_of() const override {
+    return BoundingBox(RayPoint(-1, -1, -1), RayPoint(1, 1, 1));
   }
 };
 #endif

@@ -98,3 +98,11 @@ RayVector Cone::local_normal_at(const RayPoint &point) const {
 
   return RayVector(point.x, y, point.z);
 }
+
+BoundingBox Cone::bounds_of() const {
+  double a = std::abs(minimum);
+  double b = std::abs(maximum);
+  double limit = std::max(a, b);
+  return BoundingBox(RayPoint(-limit, minimum, -limit),
+                     RayPoint(limit, maximum, limit));
+}

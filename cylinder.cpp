@@ -83,3 +83,7 @@ RayVector Cylinder::local_normal_at(const RayPoint &point) const {
 
   return RayVector(point.x, 0, point.z);
 }
+
+BoundingBox Cylinder::bounds_of() const {
+  return BoundingBox(RayPoint(-1, minimum, -1), RayPoint(1, maximum, 1));
+}

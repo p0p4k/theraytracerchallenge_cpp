@@ -19,3 +19,8 @@ std::vector<Intersection> Plane::local_intersects(const Ray &local_ray) const {
     return intersections;
   }
 }
+
+BoundingBox Plane::bounds_of() const {
+  double inf = std::numeric_limits<double>::infinity();
+  return BoundingBox(RayPoint(-inf, 0, -inf), RayPoint(inf, 0, inf));
+}

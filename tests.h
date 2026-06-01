@@ -182,5 +182,14 @@ void test_intersecting_a_cone_with_a_ray();
 void test_intersecting_cone_with_ray_parallel_to_one_half();
 void test_intersecting_a_cones_end_caps();
 void test_computing_the_normal_vector_on_a_cone();
+void test_creating_new_group();
+void test_add_child_to_group();
+void test_shape_has_parent();
+void test_ray_interesecting_with_empty_group();
+void test_ray_interesecting_with_non_empty_group();
+void test_intersecting_transformed_group();
+void test_converting_point_from_world_to_object_space();
+void test_converting_normal_from_object_to_world_space();
+void test_finding_the_normal_on_a_child_object();
 
 #endif

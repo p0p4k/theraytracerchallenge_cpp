@@ -58,3 +58,7 @@ std::vector<Intersection> Cube::local_intersects(const Ray &local_ray) const {
 
   return intersections;
 }
+
+BoundingBox Cube::bounds_of() const {
+  return BoundingBox(RayPoint(-1, -1, -1), RayPoint(1, 1, 1));
+}

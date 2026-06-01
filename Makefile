@@ -1,15 +1,15 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17
+CXXFLAGS = -O3 -Wall -Wextra -std=c++17
 
 # ONLY actual implementation source files go here
-SHARED_SRCS = utilities.cpp tuple.cpp canvas.cpp matrix.cpp sphere.cpp ray.cpp intersection.cpp light_source.cpp world.cpp camera.cpp shapes.cpp plane.cpp pattern.cpp computations.cpp cube.cpp cylinder.cpp cone.cpp
+SHARED_SRCS = utilities.cpp tuple.cpp canvas.cpp matrix.cpp sphere.cpp ray.cpp intersection.cpp light_source.cpp world.cpp camera.cpp shapes.cpp plane.cpp pattern.cpp computations.cpp cube.cpp cylinder.cpp cone.cpp groups.cpp bounding_box.cpp
 
 # Header files used to track dependencies
-DEPS = material.h utilities.h tuple.h canvas.h matrix.h sphere.h ray.h intersection.h light_source.h color.h world.h camera.h shapes.h plane.h pattern.h computations.h cube.h cylinder.h cone.h
+DEPS = material.h utilities.h tuple.h canvas.h matrix.h sphere.h ray.h intersection.h light_source.h color.h world.h camera.h shapes.h plane.h pattern.h computations.h cube.h cylinder.h cone.h groups.h bounding_box.h
 
 all: test projectile_bin matrices clock sphere_wall sphere_light_source world_render world_render_with_plane world_render_with_pattern world_render_with_reflections world_render_with_cubes
 
-latest: world_render_with_cones
+latest: hexagons
 
 test: main.cpp tests.cpp $(SHARED_SRCS) $(DEPS)
 	$(CXX) $(CXXFLAGS) main.cpp tests.cpp $(SHARED_SRCS) -o ./bin/test
@@ -46,6 +46,9 @@ world_render_with_cubes: ch_12_world_with_cubes.cpp $(SHARED_SRCS) $(DEPS)
 
 world_render_with_cones: ch_13_world_with_cones.cpp $(SHARED_SRCS) $(DEPS)
 	$(CXX) $(CXXFLAGS) ch_13_world_with_cones.cpp $(SHARED_SRCS) -o ./bin/world_render_with_cones
+
+hexagons: ch_14_hexagons.cpp  $(SHARED_SRCS) $(DEPS)
+	$(CXX) $(CXXFLAGS) ch_14_hexagons.cpp $(SHARED_SRCS) -o ./bin/hexagons
 
 
 clean:
